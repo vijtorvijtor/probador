@@ -1,0 +1,178 @@
+/* probador/css/estilos.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none; /* Evita selección accidental de texto en pantalla táctil */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.kiosco-container {
+    width: 100%;
+    max-width: 540px; /* Proporción vertical para pruebas en Mac */
+    height: 960px;
+    background-color: #1E1E1E;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+.kiosco-header {
+    text-align: center;
+    padding: 15px;
+    background-color: #000000;
+}
+
+.kiosco-header h2 {
+    color: #00E676;
+    letter-spacing: 2px;
+}
+
+/* Visor de Cámara */
+.camera-viewport {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    background-color: #000;
+    overflow: hidden;
+}
+
+#webcam {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Temporizador Overlay */
+#countdown-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#countdown-number {
+    font-size: 120px;
+    font-weight: bold;
+    color: #FFF;
+    animation: pulse 1s infinite;
+}
+
+/* Botonera de Control */
+.controls-bar {
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-primary, .btn-secondary, .btn-success {
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.btn-primary { background-color: #007BFF; color: white; flex: 1; }
+.btn-secondary { background-color: #6C757D; color: white; }
+.btn-success { background-color: #28A745; color: white; width: 100%; }
+
+.btn-primary:active, .btn-secondary:active, .btn-success:active {
+    transform: scale(0.96);
+}
+
+/* Galería Inferior */
+.gallery-section {
+    flex: 1;
+    padding: 10px;
+    background-color: #181818;
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #AAA;
+}
+
+.thumbnails-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.thumb-card {
+    position: relative;
+    min-width: 100px;
+    height: 130px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid #333;
+}
+
+.thumb-card.favorite {
+    border-color: #FFD700; /* Borde dorado para seleccionados */
+}
+
+.thumb-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumb-actions {
+    position: absolute;
+    top: 5px; right: 5px; left: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-icon {
+    background: rgba(0,0,0,0.7);
+    border: none;
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.hidden { display: none !important; }
+
+/* Modales */
+.modal-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #222;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
