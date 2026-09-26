@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de PNGs 3D - Óptica ECO</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 40px; background: #111; color: #fff;">
+    <h2>Generando archivos PNG 3D con fondo transparente...</h2>
+    <p>Tus 3 archivos (.png) se descargarán automáticamente en unos segundos.</p>
+
+    <script>
+        function downloadPng(canvas, fileName) {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        window.onload = () => {
+            // 1. CÁMARA FOTO 3D
+            setTimeout(() => {
+                const c1 = document.createElement('canvas');
+                c1.width = 200; c1.height = 200;
+                const ctx = c1.getContext('2d');
+
+                // Sombra 3D arrojada
+                ctx.shadowColor = 'rgba(0, 230, 118, 0.5)';
+                ctx.shadowBlur = 25;
+                ctx.shadowOffsetY = 14;
+
+                // Cuerpo verde neón en relieve
+                let grad = ctx.createLinearGradient(20, 20, 180, 180);
+                grad.addColorStop(0, '#00E676');
+                grad.addColorStop(1, '#004D40');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(25, 50, 150, 110, 26);
+                ctx.fill();
+
+                // Lente sobresaliente
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = '#111111';
+                ctx.beginPath();
+                ctx.arc(100, 105, 40, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#00E676';
+                ctx.beginPath();
+                ctx.arc(100, 105, 18, 0, Math.PI * 2);
+                ctx.fill();
+
+                downloadPng(c1, 'btn-foto-3d.png');
+            }, 400);
+
+            // 2. CÁMARA VIDEO 3D
+            setTimeout(() => {
+                const c2 = document.createElement('canvas');
+                c2.width = 200; c2.height = 200;
+                const ctx = c2.getContext('2d');
+
+                ctx.shadowColor = 'rgba(224, 64, 251, 0.5)';
+                ctx.shadowBlur = 25;
+                ctx.shadowOffsetY = 14;
+
+                let grad = ctx.createLinearGradient(20, 20, 180, 180);
+                grad.addColorStop(0, '#E040FB');
+                grad.addColorStop(1, '#4A148C');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(20, 55, 120, 95, 22);
+                ctx.fill();
+
+                // Cono lente video
+                ctx.fillStyle = '#7B1FA2';
+                ctx.beginPath();
+                ctx.moveTo(140, 75);
+                ctx.lineTo(180, 55);
+                ctx.lineTo(180, 150);
+                ctx.lineTo(140, 130);
+                ctx.closePath();
+                ctx.fill();
+
+                downloadPng(c2, 'btn-video-3d.png');
+            }, 1000);
+
+            // 3. EMBLEMA VS 3D
+            setTimeout(() => {
+                const c3 = document.createElement('canvas');
+                c3.width = 200; c3.height = 200;
+                const ctx = c3.getContext('2d');
+
+                ctx.shadowColor = 'rgba(255, 215, 0, 0.6)';
+                ctx.shadowBlur = 28;
+                ctx.shadowOffsetY = 14;
+
+                let grad = ctx.createLinearGradient(20, 20, 180, 180);
+                grad.addColorStop(0, '#FFD700');
+                grad.addColorStop(1, '#FF6D00');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(100, 100, 70, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = '#000000';
+                ctx.font = '900 58px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('VS', 100, 104);
+
+                downloadPng(c3, 'btn-comparar-3d.png');
+            }, 1600);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Probador Virtual - Óptica ECO</title>
+    <link rel="stylesheet" href="css/estilos.css?v=20260926">
+</head>
+<body>
+
+<div class="kiosco-container">
+    <header class="kiosco-header">
+        <h1 class="brand-title">ÓPTICA <span>ECO</span></h1>
+        <p class="brand-subtitle">Espejo Virtual & Comparador de Armazones</p>
+    </header>
+
+    <main class="camera-viewport">
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="canvas-capture" class="hidden"></canvas>
+        <div id="countdown-overlay" class="hidden">
+            <span id="countdown-number">3</span>
+        </div>
+    </main>
+
+    <nav class="controls-bar">
+        <div id="btn-capture" class="floating-3d-object" role="button" tabindex="0">
+            <img src="img/foto.png?v=20260926" alt="Fotografiar" class="icon-3d-img">
+            <span class="object-tag">FOTOGRAFIAR</span>
+        </div>
+
+        <div id="btn-loop" class="floating-3d-object" role="button" tabindex="0">
+            <img src="img/video.png?v=20260926" alt="Bucle Video" class="icon-3d-img">
+            <span class="object-tag">BUCLE (3s)</span>
+        </div>
+
+        <div id="btn-compare" class="floating-3d-object" role="button" tabindex="0">
+            <img src="img/vs.png?v=20260926" alt="Comparar" class="icon-3d-img">
+            <span class="object-tag">COMPARAR (★)</span>
+        </div>
+    </nav>
+
+    <section class="gallery-section">
+        <div class="gallery-header">
+            <span>Fotografías Tomadas</span>
+            <button id="clean-all" class="btn-clean-text">LIMPIAR TODO 🗑</button>
+        </div>
+        <div id="thumbnails-container" class="thumbnails-scroll"></div>
+    </section>
+</div>
+
+<script src="js/camara.js?v=20260926"></script>
+</body>
+</html>

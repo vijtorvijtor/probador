@@ -1,93 +1,95 @@
 <?php
-// probador/index.php
-session_start();
+// Generar timestamp único para invalidar caché
+$v = time();
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Probador Interactivo - Óptica ECO</title>
-    <link rel="stylesheet" href="css/estilos.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Probador Virtual - Óptica ECO</title>
+    <link rel="stylesheet" href="css/estilos.css?v=<?php echo $v; ?>">
 </head>
 <body>
 
-    <!-- CONTENEDOR PRINCIPAL VERTICAL (1080x1920) -->
-    <div class="kiosco-container">
+<div class="kiosco-container">
+    <!-- Encabezado del Quiosco -->
+    <header class="kiosco-header">
+        <h1 class="brand-title">ÓPTICA <span>ECO</span></h1>
+        <p class="brand-subtitle">Espejo Virtual & Comparador de Armazones</p>
+    </header>
 
-        <!-- CABECERA DE MARCA -->
-        <header class="kiosco-header">
-            <h2>ÓPTICA ECO</h2>
-            <p>Espejo Interactivo & Probador de Armazones</p>
-        </header>
+    <!-- Visor de la Cámara -->
+    <main class="camera-viewport">
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="canvas-capture" class="hidden"></canvas>
+        
+        <!-- Cuenta Regresiva -->
+        <div id="countdown-overlay" class="hidden">
+            <span id="countdown-number">3</span>
+        </div>
+    </main>
 
-        <!-- SECCIÓN 1: VISTA EN VIVO DE LA CÁMARA -->
-        <section class="camera-viewport">
-            <video id="webcam" autoplay playsinline muted></video>
-            <canvas id="canvas-capture" style="display:none;"></canvas>
-            
-            <!-- Cuenta regresiva / Temporizador visual -->
-            <div id="countdown-overlay" class="hidden">
-                <span id="countdown-number">3</span>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 2: BOTONERA PRINCIPAL DE CAPTURA -->
-        <section class="controls-bar">
-            <button id="btn-capture" class="btn-primary">
-                📸 TOMAR FOTO
-            </button>
-            <button id="btn-loop" class="btn-secondary">
-                🎬 GRABAR BUCLE (3s)
-            </button>
-        </section>
-
-        <!-- SECCIÓN 3: GALERÍA DE N-FOTOS (CARRUSEL INFERIOR) -->
-        <section class="gallery-section">
-            <div class="gallery-header">
-                <span>Fotografías Tomadas (<span id="photo-count">0</span>)</span>
-                <button id="btn-clear-all" class="btn-text">Limpiar Todo</button>
-            </div>
-
-            <!-- Tira deslizable táctil de miniaturas -->
-            <div id="thumbnails-container" class="thumbnails-scroll">
-                <!-- Se puebla dinámicamente mediante JavaScript -->
-            </div>
-        </section>
-
-        <!-- SECCIÓN 4: VISTA DE COMPARACIÓN PRINCIPAL (MÁXIMO 4 FAVORITAS EN GRANDE) -->
-        <section class="comparison-grid hidden" id="comparison-modal">
-            <div class="grid-header">
-                <h3>Comparación Lado a Lado (Favoritos ★)</h3>
-                <button id="btn-close-grid" class="btn-close">✕ Cerrar</button>
-            </div>
-            
-            <div class="grid-4x4" id="grid-favorites-container">
-                <!-- Se muestran hasta 4 fotos marcadas con Estrella -->
-            </div>
-
-            <div class="grid-footer">
-                <button id="btn-generate-qr" class="btn-success">
-                    📱 GENERAR CÓDIGO QR PARA MI CELULAR
-                </button>
-            </div>
-        </section>
-
-        <!-- OVERLAY MODAL CÓDIGO QR -->
-        <div id="qr-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <h3>¡Llévate tus fotos!</h3>
-                <p>Escanea este código QR con la cámara de tu teléfono para descargar tus opciones seleccionadas:</p>
-                <div id="qr-code-display"></div>
-                <p class="privacy-note"><small>Tus imágenes se eliminarán automáticamente en 24 horas.</small></p>
-                <button id="btn-close-qr" class="btn-secondary">Volver al Probador</button>
+    <!-- Barra de Objetos 3D Limpios y Animados -->
+    <nav class="controls-bar">
+        <!-- Objeto 1: Foto -->
+        <div id="btn-capture" class="floating-3d-object pulse-anim-1" role="button" tabindex="0" title="Fotografiar">
+            <div class="glow-ring green-glow"></div>
+            <div class="icon-3d-wrapper green-icon">
+                <span class="icon-symbol">📷</span>
             </div>
         </div>
 
-    </div>
+        <!-- Objeto 2: Bucle Video -->
+        <div id="btn-loop" class="floating-3d-object pulse-anim-2" role="button" tabindex="0" title="Bucle 3 Segundos">
+            <div class="glow-ring purple-glow"></div>
+            <div class="icon-3d-wrapper purple-icon">
+                <span class="icon-symbol">📹</span>
+                <span class="loop-tag">3s</span>
+            </div>
+        </div>
 
-    <!-- Carga de Scripts -->
-    <script src="js/camara.js"></script>
-    <script src="js/galeria.js"></script>
+        <!-- Objeto 3: Comparativa VS -->
+        <div id="btn-compare" class="floating-3d-object pulse-anim-3" role="button" tabindex="0" title="Comparativa VS">
+            <div class="glow-ring gold-glow"></div>
+            <div class="icon-3d-wrapper gold-icon">
+                <span class="vs-text">VS</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Galería de Miniaturas Inferior -->
+    <section class="gallery-section">
+        <div class="gallery-header">
+            <span>Fotografías Tomadas</span>
+            <button id="clean-all" class="btn-clean-text">LIMPIAR TODO 🗑</button>
+        </div>
+        <div id="thumbnails-container" class="thumbnails-scroll">
+            <!-- Se generan dinámicamente -->
+        </div>
+    </section>
+</div>
+
+<!-- MODAL COMPARADOR -->
+<div id="modal-compare" class="modal-overlay hidden">
+    <div class="modal-content-styled">
+        <div class="modal-header-styled">
+            <h2 class="modal-title-styled">⚡ COMPARATIVA DE ARMAZONES</h2>
+            <button id="btn-close-modal" class="btn-close-modal">CERRAR ✖</button>
+        </div>
+
+        <div class="comparison-wrapper">
+            <div id="grid-comparison" class="grid-container-base">
+                <!-- Se generan dinámicamente -->
+            </div>
+
+            <div id="overlay-focus" class="overlay-focus-container hidden">
+                <div id="focus-card-body" class="focus-card-90"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/camara.js?v=<?php echo $v; ?>"></script>
 </body>
 </html>
