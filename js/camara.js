@@ -1,4 +1,4 @@
-// probador/js/camara.js - Óptica ECO
+// js/camara.js - Óptica ECO (Versión Nativa Sin Restricciones Forzadas)
 
 document.addEventListener('DOMContentLoaded', () => {
     const video = document.getElementById('webcam');
@@ -14,20 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCompare = document.getElementById('modal-compare');
     const btnCloseModal = document.getElementById('btn-close-modal');
     const gridComparison = document.getElementById('grid-comparison');
-    const overlayFocus = document.getElementById('overlay-focus');
-    const focusCardBody = document.getElementById('focus-card-body');
+
+    // Módulos QR / WhatsApp Directo
+    const btnGenerateQR = document.getElementById('btn-generate-qr');
+    const modalQR = document.getElementById('modal-qr');
+    const btnCloseQR = document.getElementById('btn-close-qr');
+    const qrCodeImg = document.getElementById('qr-code-img');
+    const qrUrlInput = document.getElementById('qr-url-input');
+    const btnCopyUrl = document.getElementById('btn-copy-url');
 
     let capturedPhotos = [];
     let mediaStream = null;
 
     async function initCamera() {
         try {
+            // Se eliminan las restricciones forzadas de width/height para aceptar el flujo nativo de la Arducam
             mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: 1080 },
-                    height: { ideal: 1080 },
-                    facingMode: "user"
-                },
+                video: true,
                 audio: false
             });
             if (video) {
@@ -36,18 +39,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             console.error("Error al acceder a la cámara:", err);
-            alert("No se pudo conectar con la cámara web.");
+            alert("Atención: No se pudo activar la cámara web. Asegúrate de otorgar permisos en el navegador.");
         }
     }
 
     if (btnCapture) {
-        btnCapture.addEventListener('click', () => {
-            startFastCountdown(() => { takeSquareSnapshot(); });
+        btnCapture.addEventListener('click', (e) => {
+            e.preventDefault();
+            startFastCountdown(() => { takeCleanSnapshot(); });
         });
     }
 
     if (btnLoop) {
-        btnLoop.addEventListener('click', () => {
+        btnLoop.addEventListener('click', (e) => {
+            e.preventDefault();
             startFastCountdown(() => { recordLoopAsync(3000); });
         });
     }
@@ -60,18 +65,69 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCloseModal.addEventListener('click', () => { closeComparisonModal(); });
     }
 
-    if (focusCardBody) {
-        focusCardBody.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeFocusView();
-        });
-    }
-
     if (cleanAll) {
         cleanAll.addEventListener('click', () => {
             capturedPhotos = [];
             renderThumbnails();
         });
+    }
+
+    if (btnGenerateQR) {
+        btnGenerateQR.addEventListener('click', () => { generateRealQR(); });
+    }
+
+    if (btnCloseQR) {
+        btnCloseQR.addEventListener('click', () => {
+            if (modalQR) modalQR.classList.add('hidden');
+        });
+    }
+
+    if (btnCopyUrl) {
+        btnCopyUrl.addEventListener('click', () => {
+            if (qrUrlInput && qrUrlInput.value) {
+                navigator.clipboard.writeText(qrUrlInput.value);
+                btnCopyUrl.textContent = "¡COPIADO!";
+                setTimeout(() => { btnCopyUrl.textContent = "COPIAR"; }, 2000);
+            }
+        });
+    }
+
+    async function generateRealQR() {
+        const imagePhotos = capturedPhotos.filter(item => item.type === 'image').map(item => item.src);
+
+        if (imagePhotos.length === 0) {
+            alert("Toma al menos una fotografía antes de solicitar las fotos por WhatsApp.");
+            return;
+        }
+
+        try {
+            btnGenerateQR.textContent = "GENERANDO WHATSAPP...";
+
+            const response = await fetch('generar_qr.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fotos: imagePhotos })
+            });
+
+            const res = await response.json();
+
+            if (res.status === 'success' && res.qr_img && res.url) {
+                qrCodeImg.src = res.qr_img;
+
+                if (qrUrlInput) {
+                    qrUrlInput.value = res.url;
+                }
+
+                modalQR.classList.remove('hidden');
+            } else {
+                alert("Ocurrió un inconveniente al generar el código para WhatsApp.");
+            }
+        } catch (err) {
+            console.error("Error al procesar el QR de WhatsApp:", err);
+            alert("Error al conectar con el servidor para generar el mensaje de WhatsApp.");
+        } finally {
+            btnGenerateQR.textContent = "📲 RECIBIR FOTOS POR WHATSAPP";
+        }
     }
 
     function startFastCountdown(callback) {
@@ -88,28 +144,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     countdownOverlay.classList.add('hidden');
                     callback();
-                }, 800);
+                }, 300);
 
-            }, 800);
+            }, 300);
 
-        }, 350);
+        }, 300);
     }
 
-    function takeSquareSnapshot() {
-        if (!video || !video.videoWidth || !video.videoHeight) return;
+    function takeCleanSnapshot() {
+        if (!video || !canvas) return;
 
-        const context = canvas.getContext('2d');
-        const size = Math.min(video.videoWidth, video.videoHeight);
-        
-        const startX = (video.videoWidth - size) / 2;
-        const startY = (video.videoHeight - size) / 2;
+        const ctx = canvas.getContext('2d');
+        const vWidth = video.videoWidth || 640;
+        const vHeight = video.videoHeight || 480;
+
+        const size = Math.min(vWidth, vHeight);
+        const startX = (vWidth - size) / 2;
+        const startY = (vHeight - size) / 2;
 
         canvas.width = size;
         canvas.height = size;
 
-        context.drawImage(video, startX, startY, size, size, 0, 0, size, size);
-        
-        const imageData = canvas.toDataURL('image/jpeg', 0.95);
+        ctx.drawImage(video, startX, startY, size, size, 0, 0, size, size);
+
+        const imageData = canvas.toDataURL('image/jpeg', 0.92);
         addCapturedItem(imageData, 'image');
     }
 
@@ -137,11 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addCapturedItem(url, type) {
+        const isFavoriteAuto = capturedPhotos.length < 4;
         capturedPhotos.push({
             id: Date.now(),
             src: url,
             type: type,
-            favorite: true
+            favorite: isFavoriteAuto
         });
         renderThumbnails();
     }
@@ -167,14 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         capturedPhotos.forEach((item) => {
             const card = document.createElement('div');
-            card.className = `thumb-card ${item.favorite ? 'favorite' : ''}`;
+            card.className = `thumb-card ${item.favorite ? 'is-favorite' : ''}`;
 
             if (item.type === 'image') {
                 const img = document.createElement('img');
                 img.src = item.src;
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
                 card.appendChild(img);
             } else {
                 const vid = document.createElement('video');
@@ -182,35 +238,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 vid.autoplay = true;
                 vid.loop = true;
                 vid.muted = true;
-                vid.style.width = '100%';
-                vid.style.height = '100%';
-                vid.style.objectFit = 'cover';
                 card.appendChild(vid);
             }
 
-            const actions = document.createElement('div');
-            actions.className = 'thumb-actions';
-
             const btnFav = document.createElement('button');
-            btnFav.className = `btn-icon btn-fav ${item.favorite ? 'active' : ''}`;
+            btnFav.className = 'btn-fav-thumb';
             btnFav.innerHTML = '★';
+            btnFav.title = item.favorite ? 'Quitar Favorito' : 'Marcar Favorito';
             btnFav.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleFavorite(item.id);
             });
 
             const btnDel = document.createElement('button');
-            btnDel.className = 'btn-icon btn-delete';
-            btnDel.innerHTML = '🗑';
+            btnDel.className = 'btn-delete-thumb';
+            btnDel.innerHTML = '✖';
+            btnDel.title = 'Eliminar fotografía';
             btnDel.addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteItem(item.id);
             });
 
-            actions.appendChild(btnFav);
-            actions.appendChild(btnDel);
-            card.appendChild(actions);
-
+            card.appendChild(btnFav);
+            card.appendChild(btnDel);
             thumbnailsContainer.appendChild(card);
         });
     }
@@ -219,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const favorites = capturedPhotos.filter(item => item.favorite);
 
         if (favorites.length === 0) {
-            alert("No tienes capturas marcadas como favoritas (★) para comparar.");
+            alert("No tienes capturas marcadas como favoritas (★) para comparar. Marca hasta 4 fotos.");
             return;
         }
 
@@ -229,17 +279,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeComparisonModal() {
         modalCompare.classList.add('hidden');
-        closeFocusView();
     }
 
     function renderComparisonGrid(favorites) {
+        if (!gridComparison) return;
         gridComparison.innerHTML = '';
-        const totalSlots = 4;
 
-        for (let i = 0; i < totalSlots; i++) {
+        const count = favorites.length;
+
+        if (count <= 2) {
+            gridComparison.className = 'grid-container-base grid-2';
+        } else {
+            gridComparison.className = 'grid-container-base grid-4';
+        }
+
+        const slotsToRender = (count <= 2) ? 2 : 4;
+
+        for (let i = 0; i < slotsToRender; i++) {
             const card = document.createElement('div');
 
-            if (i < favorites.length) {
+            if (i < count) {
                 const item = favorites[i];
                 card.className = 'grid-item-card';
 
@@ -256,44 +315,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.appendChild(vid);
                 }
 
-                card.addEventListener('click', (e) => {
+                const btnRemove = document.createElement('button');
+                btnRemove.className = 'btn-remove-grid';
+                btnRemove.innerHTML = 'QUITAR ✖';
+                btnRemove.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    triggerFocusView(item);
+                    toggleFavorite(item.id);
+                    const updatedFavorites = capturedPhotos.filter(f => f.favorite);
+                    if (updatedFavorites.length === 0) {
+                        closeComparisonModal();
+                    } else {
+                        renderComparisonGrid(updatedFavorites);
+                    }
                 });
+                card.appendChild(btnRemove);
+
+                card.addEventListener('click', () => {
+                    const isZoomed = card.classList.contains('zoomed');
+                    document.querySelectorAll('.grid-item-card').forEach(c => c.classList.remove('zoomed'));
+                    if (!isZoomed) {
+                        card.classList.add('zoomed');
+                    }
+                });
+
             } else {
                 card.className = 'grid-item-card empty-slot';
-                card.innerHTML = '<span>Espacio Libre</span>';
+                card.innerHTML = '<span style="color: rgba(255,255,255,0.4); font-weight: bold; font-size: 14px;">+ Espacio Libre</span>';
             }
 
             gridComparison.appendChild(card);
-        }
-    }
-
-    function triggerFocusView(item) {
-        focusCardBody.innerHTML = '';
-
-        if (item.type === 'image') {
-            const img = document.createElement('img');
-            img.src = item.src;
-            focusCardBody.appendChild(img);
-        } else {
-            const vid = document.createElement('video');
-            vid.src = item.src;
-            vid.autoplay = true;
-            vid.loop = true;
-            vid.muted = true;
-            focusCardBody.appendChild(vid);
-        }
-
-        overlayFocus.style.pointerEvents = 'none';
-        focusCardBody.style.pointerEvents = 'auto';
-
-        overlayFocus.classList.remove('hidden');
-    }
-
-    function closeFocusView() {
-        if (overlayFocus) {
-            overlayFocus.classList.add('hidden');
         }
     }
 
