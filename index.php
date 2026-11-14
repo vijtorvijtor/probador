@@ -14,16 +14,22 @@ $v = time();
 </head>
 <body oncontextmenu="return false;">
 
+    <!-- BLOQUE ÚNICO Y OPTIMIZADO -->
+    <div id="screensaver" class="screensaver-active">
+        <video id="video-screensaver" src="screensaver.mp4" autoplay loop muted playsinline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></video>
+        <div class="overlay-text">TOCA LA PANTALLA PARA EMPEZAR</div>
+    </div>
+
 <div class="vanity-frame-outer">
     <div class="bulb-row bulb-top">
-        <div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div>
+        <div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div>
     </div>
 
     <div class="bulb-col bulb-left">
-        <div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div>
+        <div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div>
     </div>
     <div class="bulb-col bulb-right">
-        <div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div>
+        <div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div><div class="foco"></div>
     </div>
 
     <div class="kiosco-container">

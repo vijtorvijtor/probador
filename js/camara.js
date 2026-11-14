@@ -13,17 +13,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridComparison = document.getElementById('grid-comparison');
     const sessionToken = "ECO_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
     const btnCloseModal = document.getElementById('btn-close-modal');
+    const screensaver = document.getElementById('screensaver');
+    const videoSS = document.getElementById('video-screensaver');
+    const overlayText = document.querySelector('.overlay-text');
     let capturedPhotos = []; 
     let mediaStream = null;
+    let idleTimer;
 
+    // Al cargar la página, aseguramos que esté visible
+    window.onload = () => {
+        screensaver.classList.remove('hidden');
+    };
+
+    // Si el video falla al cargar o no está listo, mostramos el texto
+    videoSS.onerror = () => { screensaver.classList.add('screensaver-error'); };
+
+    // Al tocar, reseteamos
+    document.addEventListener('touchstart', () => {
+        screensaver.classList.add('hidden');
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            screensaver.classList.remove('hidden');
+        }, 60000);
+    });
     // --- CÁMARA ---
     async function initCamera() {
         const debug = document.getElementById('debug-log');
-        debug.style.display = 'block';
-        debug.style.background = 'black';
-        debug.style.color = 'lime';
-        debug.innerHTML = "<strong>Iniciando diagnóstico profundo...</strong><br>";
-
+        // Ocultamos el log completamente al inicio
+        debug.style.display = 'none';
         try {
             // 1. Intentar listar sin abrir primero (esto ayuda a no bloquearse)
             const devices = await navigator.mediaDevices.enumerateDevices();
@@ -64,7 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (err) {
-            debug.innerHTML += `<br><span style='color:red'>FALLO CRÍTICO:<br>Nombre: ${err.name}<br>Mensaje: ${err.message}</span>`;
+            // Solo si falla, mostramos el error
+            debug.style.display = 'block';
+            debug.style.color = 'red';
+            debug.innerHTML = `ERROR: ${err.name} - ${err.message}`;
             console.error(err);
         }
     }
