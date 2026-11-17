@@ -29,28 +29,46 @@ body { background: radial-gradient(circle, #2c3e50 0%, #000000 100%); color: #ff
 .bulb-col.bulb-left { left: 10px; top: 70px; bottom: 70px; flex-direction: column; }
 .bulb-col.bulb-right { right: 10px; top: 70px; bottom: 70px; flex-direction: column; }
 
-.kiosco-container { width: 100%; height: 100%; background-color: var(--vanity-bg); border: 1px solid var(--glass-border); display: flex; flex-direction: column; padding: 20px; gap: 15px; }
+.kiosco-container {
+    width: 100%;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
+}
 
 .brand-title { font-size: 2.8rem; font-weight: 900; text-align: center; color: #fff; }
 .brand-title span { color: var(--text-gold); }
 
-.camera-viewport { position: relative; width: 900px; height: 900px; margin: 0 auto; background-color: #000; border: 3px solid var(--text-gold); overflow: hidden; }
-
+/* Marco elegante para la cámara */
+.camera-viewport {
+    border: 4px solid #b8860b !important;
+    border-radius: 15px !important;
+    background: #1a1a1a !important; /* Gris muy oscuro en lugar de negro total */
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px rgba(184, 134, 11, 0.2) !important;
+}
 /* 2. Botones Principales más grandes */
 .controls-bar {
     display: flex; justify-content: space-around; padding: 20px;
 }
-.floating-3d-object {
-    width: 80px; height: 80px; font-size: 2rem; /* Más grandes */
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: #1e2130; border: 3px solid var(--text-gold);
+
+/* Forzado de botones metalizados y eliminación de iconos */
+.icon-symbol, .vs-text { display: none !important; }
+
+.floating-3d-object, .btn-whatsapp, .btn-delete-all {
+    background: linear-gradient(135deg, #fceabb 0%, #f8d800 50%, #b8860b 100%) !important;
+    border: 3px solid #5d3a1a !important;
+    border-radius: 25px !important;
+    box-shadow: 0 6px 0 #5d3a1a !important;
+    color: #2b1d00 !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    font-size: 1.5rem !important;
+    height: 100px !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
 }
 
 .btn-active-state { background: var(--text-gold) !important; }
 .btn-active-state span { color: #000 !important; }
-
-.icon-symbol { font-size: 4.5rem; }
-.vs-text { font-size: 3.5rem; font-weight: 900; color: var(--text-gold); }
 
 /* CARRETE ULTRA LIGERO */
 .gallery-section { background: rgba(255,255,255,0.03); padding: 15px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
@@ -145,12 +163,6 @@ body { background: radial-gradient(circle, #2c3e50 0%, #000000 100%); color: #ff
 #countdown-number { font-size: 15rem; font-weight: 900; color: var(--text-gold); }
 
 /* 3. Homogeneizar Botones de Acción */
-.btn-whatsapp, .btn-delete-all {
-    padding: 15px 25px; border-radius: 10px; font-weight: bold;
-    border: none; cursor: pointer; text-transform: uppercase;
-}
-.btn-whatsapp { background: #25d366; color: white; }
-.btn-delete-all { background: #ff4444; color: white; }
 .btn-close-vs {
     width: 100%; height: 80px;
     background: #ff4444; color: #fff;

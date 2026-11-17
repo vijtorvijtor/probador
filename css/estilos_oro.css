@@ -1,0 +1,26 @@
+/* Clase única para todos los botones, diseño 3D, textura oro */
+.btn-eco, .btn-whatsapp, .btn-delete-all {
+    background-image: url('/img/hojaOro.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-color: #DAA520 !important;
+    border: 3px solid #b8860b !important;
+    border-radius: 40px !important;
+    color: #000 !important;
+    font-weight: 900 !important;
+    font-family: sans-serif !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.6) !important;
+    box-shadow: inset 0 4px 6px rgba(255,255,255,0.7), 0 6px 0 #5d3a1a !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    cursor: pointer !important;
+}
+
+/* Distribución: 3 arriba, 2 abajo */
+.btn-eco { width: 31% !important; height: 120px !important; font-size: 1.6rem !important; }
+.btn-whatsapp, .btn-delete-all { width: 48% !important; height: 90px !important; font-size: 1.4rem !important; }
+
+/* Rojo exclusivo para ELIMINAR */
+#clean-all { color: #D32F2F !important; }
