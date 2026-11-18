@@ -6,7 +6,7 @@
     <title>Probador Virtual - Óptica ECO</title>
     <link rel="stylesheet" href="css/estilos_oro.css?v=<?php echo time(); ?>">
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return true;">
 
     <div id="screensaver">
         <video id="video-screensaver" src="screensaver.mp4" autoplay loop muted playsinline></video>
@@ -26,16 +26,18 @@
         </main>
 
         <nav class="controls-bar">
+            <div class="row">
             <button id="btn-capture" class="btn-eco btn-oro">FOTO</button>
             <button id="btn-loop" class="btn-eco btn-oro">VIDEO</button>
             <button id="btn-compare" class="btn-eco btn-oro">COMPARAR</button>
+            </div>
+            <div class="row">
+                <button id="btn-generate-qr" class="btn-whatsapp btn-oro">WHATSAPP</button>
+                <button id="clean-all" class="btn-delete-all btn-oro">ELIMINAR</button>
+            </div>
         </nav>
 
         <section class="gallery-section">
-            <div class="action-group">
-                <button id="btn-generate-qr" class="btn-whatsapp btn-oro">WHATSAPP QR</button>
-                <button id="clean-all" class="btn-delete-all btn-oro">ELIMINAR</button>
-            </div>
             <div id="thumbnails-container" class="thumbnails-scroll"></div>
         </section>
     </div>
@@ -47,3 +49,4 @@
     <script src="js/camara.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
+
