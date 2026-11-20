@@ -12,7 +12,7 @@ body { background: #222; margin: 0; font-family: sans-serif; overflow-x: hidden;
 #screensaver {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999;
     background: #000; transition: opacity 0.4s ease;
-    will-change: opacity; backface-visibility: hidden; /* Forzar renderizado en GPU */
+    will-change: opacity; backface-visibility: hidden;
 }
 #screensaver.hidden { opacity: 0; pointer-events: none; }
 #video-screensaver { width: 100vw; height: 100vh; object-fit: cover; pointer-events: none; }
@@ -26,84 +26,12 @@ body { background: #222; margin: 0; font-family: sans-serif; overflow-x: hidden;
 .flash-animate { animation: flashGold 0.6s ease-out; }
 @keyframes flashGold { 0% { opacity: 0; } 50% { opacity: 0.8; } 100% { opacity: 0; } }
 
-#thumbnails-container { display: flex; overflow-x: auto; gap: 15px; padding: 20px; width: 100%; }
+#thumbnails-container { display: flex; overflow-x: hidden; gap: 15px; padding: 20px; width: 80%; margin: 0 auto; scroll-behavior: smooth; }
 .thumbnail-item { position: relative; min-width: 150px; height: 150px; border-radius: 25px; border: 3px solid #b8860b; overflow: hidden; }
-.thumbnail-item img { width: 100%; height: 100%; object-fit: cover; }
+.thumbnail-item img, .thumbnail-item video { width: 100%; height: 100%; object-fit: cover; }
+.thumbnail-item.is-video::after { content: '🎥'; position: absolute; top: 5px; left: 5px; font-size: 20px; }
+.thumbnail-item.is-favorite { border: 5px solid #FFD700; box-shadow: 0 0 15px #FFD700; }
 .thumb-actions { position: absolute; bottom: 5px; right: 5px; display: flex; gap: 10px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 10px; }
-
-/* Forzar escritura en js/camara.js con 500ms */
-(function() {
-    const video = document.getElementById('webcam');
-    const overlay = document.getElementById('countdown-overlay');
-    const counter = document.getElementById('countdown-number');
-    const flash = document.getElementById('flash-overlay');
-    const canvas = document.getElementById('canvas-capture');
-    const ss = document.getElementById('screensaver');
-    const container = document.getElementById('thumbnails-container');
-    const debug = document.getElementById('debug-log');
-
-    function log(msg) { if(debug) debug.innerHTML += msg + '<br>'; console.log(msg); }
-
-    document.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('btn-oro')) {
-            e.target.classList.add('clicked');
-            setTimeout(() => e.target.classList.remove('clicked'), 200);
-        }
-    });
-
-    const hide = () => {
-        if (ss && !ss.classList.contains('hidden')) {
-            ss.classList.add('hidden');
-        }
-    };
-    ['mousedown', 'touchstart', 'keydown'].forEach(evt => document.addEventListener(evt, hide, { once: true }));
-
-    async function startCountdown() {
-        if (overlay) overlay.classList.remove('hidden');
-        for (let i = 3; i > 0; i--) {
-            if (counter) counter.textContent = i;
-            await new Promise(r => setTimeout(r, 500));
-        }
-        if (overlay) overlay.classList.add('hidden');
-        takePhoto();
-    }
-
-    function takePhoto() {
-        if (flash) {
-            flash.classList.add('flash-animate');
-            setTimeout(() => flash.classList.remove('flash-animate'), 600);
-        }
-        if (!canvas || !video) return;
-        const ctx = canvas.getContext('2d');
-        canvas.width = 640; canvas.height = 480;
-        ctx.drawImage(video, 0, 0, 640, 480);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        if (container) {
-            const div = document.createElement('div');
-            div.className = 'thumbnail-item';
-            div.innerHTML = `<img src="${dataUrl}">` +
-                            '<div class="thumb-actions">' +
-                            '<button onclick="this.parentElement.parentElement.remove()">🗑️</button>' +
-                            '<button>❤️</button></div>';
-            container.prepend(div);
-        }
-    }
-
-    document.getElementById('btn-capture').addEventListener('click', startCountdown);
-
-    async function initCamera() {
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const kioskCam = devices.find(d => d.kind === 'videoinput' && d.label.toLowerCase().includes('camara_kiosco'));
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { deviceId: kioskCam ? { exact: kioskCam.deviceId } : undefined, width: 640, height: 480 },
-                audio: false
-            });
-            video.srcObject = stream;
-            log('Camara OK: ' + (kioskCam ? kioskCam.label : 'Default'));
-        } catch (err) {
-            log('Error Camara: ' + err.message);
-        }
-    }
-    initCamera();
-})();
+.nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: #b8860b; color: white; border: none; padding: 20px; cursor: pointer; z-index: 10; border-radius: 50%; }
+.prev-btn { left: 10px; }
+.next-btn { right: 10px; }

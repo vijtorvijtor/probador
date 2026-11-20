@@ -1,3 +1,4 @@
+// js/camara.js (Corregido y optimizado para estabilidad)
 (function() {
     const video = document.getElementById('webcam');
     const overlay = document.getElementById('countdown-overlay');
@@ -8,44 +9,62 @@
     const container = document.getElementById('thumbnails-container');
     const debug = document.getElementById('debug-log');
 
+    let idleTimer;
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => { if (ss) ss.classList.remove('hidden'); }, 60000);
+    }
+    ['mousedown', 'touchstart', 'keydown', 'pointerup'].forEach(evt => document.addEventListener(evt, () => {
+        if (ss) ss.classList.add('hidden');
+        resetIdleTimer();
+    }));
+
     function log(msg) { if(debug) debug.innerHTML += msg + '<br>'; console.log(msg); }
 
-    document.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('btn-oro')) {
-            e.target.classList.add('clicked');
-            setTimeout(() => e.target.classList.remove('clicked'), 200);
-        }
+    function updateFavorites() {
+        const items = Array.from(container.querySelectorAll('.thumbnail-item'));
+        items.forEach((item, index) => {
+            if (index < 4) item.classList.add('is-favorite');
+            else item.classList.remove('is-favorite');
+        });
+    }
+
+    let startX, startY, mediaRecorder, chunks = [];
+    document.addEventListener('pointerdown', (e) => {
+        if (!e.target.matches('.btn-oro')) return;
+        startX = e.clientX; startY = e.clientY;
     });
 
-    const hide = () => {
-        if (ss && !ss.classList.contains('hidden')) {
-            ss.classList.add('hidden');
-        }
-    };
-    ['mousedown', 'touchstart', 'keydown'].forEach(evt => document.addEventListener(evt, hide, { once: true }));
-
-    // Evento de disparo con tolerancia de movimiento
-    let startX, startY;
-    const btn = document.getElementById('btn-capture');
-    btn.addEventListener('pointerdown', (e) => { startX = e.clientX; startY = e.clientY; });
-    btn.addEventListener('pointerup', (e) => {
-        if (Math.abs(e.clientX - startX) < 20 && Math.abs(e.clientY - startY) < 20) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            e.target.classList.add('clicked');
-            setTimeout(() => e.target.classList.remove('clicked'), 200);
-            setTimeout(startCountdown, 50);
-        }
+    document.addEventListener('pointerup', (e) => {
+        if (!e.target.matches('.btn-oro') || Math.abs(e.clientX - startX) > 20 || Math.abs(e.clientY - startY) > 20) return;
+        e.target.classList.add('clicked');
+        setTimeout(() => e.target.classList.remove('clicked'), 200);
+        if(e.target.id === 'btn-capture') startCountdown(false);
+        if(e.target.id === 'btn-loop') startCountdown(true);
     });
 
-    async function startCountdown() {
+    async function startCountdown(isVideo) {
         if (overlay) overlay.classList.remove('hidden');
-        for (let i = 3; i > 0; i--) {
-            if (counter) counter.textContent = i;
-            await new Promise(r => setTimeout(r, 500));
-        }
+        counter.textContent = "REC";
+        await new Promise(r => setTimeout(r, 500));
         if (overlay) overlay.classList.add('hidden');
-        takePhoto();
+        if (isVideo) recordVideo(); else takePhoto();
+    }
+
+    function recordVideo() {
+        if (flash) flash.classList.add('flash-animate');
+        chunks = [];
+        mediaRecorder = new MediaRecorder(video.srcObject);
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = () => {
+            const div = document.createElement('div');
+            div.className = 'thumbnail-item is-video';
+            div.innerHTML = `<video src="${URL.createObjectURL(new Blob(chunks, {type: 'video/webm'}))}" muted loop playsinline></video><div class="thumb-actions"><button onclick="this.parentElement.parentElement.remove(); updateFavorites()">🗑️</button><button>❤️</button></div>`;
+            container.prepend(div);
+            updateFavorites();
+        };
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 3000);
     }
 
     function takePhoto() {
@@ -57,16 +76,11 @@
         const ctx = canvas.getContext('2d');
         canvas.width = 640; canvas.height = 480;
         ctx.drawImage(video, 0, 0, 640, 480);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        if (container) {
-            const div = document.createElement('div');
-            div.className = 'thumbnail-item';
-            div.innerHTML = `<img src="${dataUrl}">` + 
-                            '<div class="thumb-actions">' +
-                            '<button onclick="this.parentElement.parentElement.remove()">🗑️</button>' +
-                            '<button>❤️</button></div>';
-            container.prepend(div);
-        }
+        const div = document.createElement('div');
+        div.className = 'thumbnail-item';
+        div.innerHTML = `<img src="${canvas.toDataURL('image/jpeg', 0.85)}"><div class="thumb-actions"><button onclick="this.parentElement.parentElement.remove(); updateFavorites()">🗑️</button><button>❤️</button></div>`;
+        container.prepend(div);
+        updateFavorites();
     }
 
     async function initCamera() {
@@ -79,10 +93,8 @@
             });
             video.srcObject = stream;
             log('Camara OK: ' + (kioskCam ? kioskCam.label : 'Default'));
-        } catch (err) {
-            log('Error Camara: ' + err.message);
-        }
+            resetIdleTimer();
+        } catch (err) { log('Error Camara: ' + err.message); }
     }
     initCamera();
 })();
-
