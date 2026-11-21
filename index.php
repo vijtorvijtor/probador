@@ -8,7 +8,7 @@
         <main class="camera-viewport">
             <video id="webcam" autoplay playsinline muted></video>
             <div id="flash-overlay"></div>
-            <div id="countdown-overlay" class="hidden"><span id="countdown-number"></span></div>
+            <div id="countdown-overlay" class="hidden"><span id="countdown-number">3</span></div>
             <canvas id="canvas-capture" style="display:none;"></canvas>
         </main>
         <nav class="controls-bar">
@@ -22,7 +22,11 @@
                 <button id="clean-all" class="btn-oro">ELIMINAR</button>
             </div>
         </nav>
-        <section class="gallery-section"><div id="thumbnails-container" class="thumbnails-scroll"></div></section>
+        <section class="gallery-section" style="position: relative;">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="document.getElementById('thumbnails-container').scrollBy(-200, 0)">&#10094;</button>
+            <div id="thumbnails-container" class="thumbnails-scroll"></div>
+            <button class="nav-btn next-btn" id="next-btn" onclick="document.getElementById('thumbnails-container').scrollBy(200, 0)">&#10095;</button>
+        </section>
     </div>
     <div id="debug-log" style="position:fixed; top:10px; left:10px; z-index:999999; color:#FFF; pointer-events:none; font-size: 12px; background: rgba(0,0,0,0.5);"></div>
     <script src="js/camara.js?v=<?php echo time(); ?>"></script>
