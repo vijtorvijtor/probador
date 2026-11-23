@@ -2,6 +2,7 @@
 <html lang="es">
 <head><meta charset="UTF-8"><title>Probador Virtual - Óptica ECO</title><link rel="stylesheet" href="css/estilos_oro.css?v=<?php echo time(); ?>"></head>
 <body>
+    <div id="debug-log"></div>
     <div id="screensaver"><video id="video-screensaver" src="screensaver.mp4" autoplay loop muted playsinline preload="auto"></video></div>
     <div class="kiosco-container">
         <header style="text-align:center; color: #b8860b; font-size: 3rem; margin: 10px;">ÓPTICA ECO</header>
