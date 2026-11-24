@@ -1,4 +1,6 @@
 (function() {
+    const ASPECT_X = 1;
+    const ASPECT_Y = 1;
     const video = document.getElementById('webcam'), container = document.getElementById('thumbnails-container');
     const overlay = document.getElementById('countdown-overlay'), counter = document.getElementById('countdown-number'), flash = document.getElementById('flash-overlay');
     const ss = document.getElementById('screensaver'), debug = document.getElementById('debug-log');
@@ -25,46 +27,6 @@
             }
         }
     }, { passive: true });
-
-    // Listener ultra-agresivo en fase de captura para el screensaver
-    document.addEventListener('pointerup', (e) => {
-        const ss = document.getElementById('screensaver');
-        if (ss && !ss.classList.contains('hidden')) {
-            ss.classList.add('hidden');
-            resetIdleTimer();
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    }, { capture: true, passive: false });
-
-    // El listener debe estar atado al screensaver mismo para capturar el toque mientras es visible
-        if (ss) {
-        // Forzamos el evento en la captura inicial
-        ['mousedown', 'touchstart', 'pointerup'].forEach(evt => {
-            document.addEventListener(evt, (e) => {
-                if (!ss.classList.contains('hidden')) {
-            ss.classList.add('hidden');
-            resetIdleTimer();
-                    e.preventDefault();
-                    e.stopPropagation();
-        }
-            }, { capture: true, passive: false });
-        });
-    }
-
-    // Diagnóstico y solución directa en el video del screensaver
-    const videoSS = document.getElementById('video-screensaver');
-    if (videoSS) {
-        ['mousedown', 'touchstart', 'pointerup'].forEach(evt => {
-            videoSS.addEventListener(evt, (e) => {
-                log(`Click en Screensaver detectado`);
-        const ss = document.getElementById('screensaver');
-                if (ss) ss.classList.add('hidden');
-                resetIdleTimer();
-                e.stopPropagation();
-            }, { passive: false });
-        });
-        }
 
     function resetIdleTimer() { clearTimeout(idleTimer); idleTimer = setTimeout(() => { if (ss) ss.classList.remove('hidden'); }, 60000); }
     function updateFavorites() {
@@ -120,8 +82,23 @@
     }
 
     function takePhoto() {
-        const canvas = document.createElement('canvas'); canvas.width = 640; canvas.height = 480;
-        canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+        const canvas = document.createElement('canvas');
+        canvas.width = 800 * ASPECT_X;
+        canvas.height = 800 * ASPECT_Y;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const ratio = video.videoWidth / video.videoHeight;
+        const targetRatio = ASPECT_X / ASPECT_Y;
+
+        let sW = video.videoWidth, sH = video.videoHeight, sX = 0, sY = 0;
+        if (ratio > targetRatio) {
+            sW = video.videoHeight * targetRatio; sX = (video.videoWidth - sW) / 2;
+        } else {
+            sH = video.videoWidth / targetRatio; sY = (video.videoHeight - sH) / 2;
+        }
+        ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+
         const div = document.createElement('div');
         div.className = 'thumbnail-item';
         div.innerHTML = createThumbHTML(`<img src="${canvas.toDataURL('image/jpeg', 0.85)}">`);
@@ -132,6 +109,34 @@
 
     document.getElementById('btn-capture').addEventListener('click', () => startCountdown(false));
     document.getElementById('btn-loop').addEventListener('click', () => startCountdown(true));
+
+    function toggleComparison() {
+        const compView = document.getElementById('comparison-view');
+        const container = document.getElementById('thumbnails-container');
+        if (compView.classList.contains('active')) {
+            compView.classList.remove('active');
+        } else {
+            const gridItems = compView.querySelector('.grid-items');
+            gridItems.innerHTML = '';
+            const items = Array.from(container.querySelectorAll('.thumbnail-item')).slice(-4);
+            items.forEach(item => {
+                const clone = item.cloneNode(true);
+                // Listener de expansión limpio
+                clone.addEventListener('click', (e) => {
+                    if(e.target.tagName !== 'BUTTON') clone.classList.toggle('expanded');
+                });
+                gridItems.appendChild(clone);
+            });
+            compView.classList.add('active');
+        }
+    }
+
+    document.getElementById('btn-compare').addEventListener('click', toggleComparison);
+    document.querySelector('.close-grid').addEventListener('click', toggleComparison);
+
+    // Sincronización absoluta de variables de aspecto
+    document.documentElement.style.setProperty('--aspect-x', ASPECT_X);
+    document.documentElement.style.setProperty('--aspect-y', ASPECT_Y);
 
     async function initCamera() {
         try {
@@ -145,15 +150,24 @@
     }
     initCamera();
 
-    // Listener definitivo para el Screensaver: aplicado al contenedor padre
-    const ssElement = document.getElementById('screensaver');
-    if (ssElement) {
-        ['mousedown', 'touchstart', 'pointerup'].forEach(evt => {
-            ssElement.addEventListener(evt, () => {
-                ssElement.classList.add('hidden');
-            resetIdleTimer();
-            }, { passive: true });
+    // Listener de sistema protegido (No modificar)
+    (function initScreensaverProtection() {
+        const ss = document.getElementById('screensaver');
+        if (!ss) return;
+
+        const handleExit = (e) => {
+            if (!ss.classList.contains('hidden')) {
+            ss.classList.add('hidden');
+                if (typeof resetIdleTimer === 'function') resetIdleTimer();
+                e.preventDefault();
+                e.stopPropagation();
+                }
+        };
+
+        ['mousedown', 'touchstart', 'pointerup', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, handleExit, { capture: true, passive: false });
         });
-        }
 })();
+})();
+
 
