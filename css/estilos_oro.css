@@ -30,7 +30,21 @@ body { background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat
 
 /* Tamaños porcentuales exactos */
 .camera-viewport { width: 80% !important; aspect-ratio: 4/3; }
-.carrete-item { width: 16% !important; aspect-ratio: 4/3; }
+
+/* --- RESTAURACIÓN: Reglas de oro (20% ancho, 20px radio, 4:3 aspecto) --- */
+.carrete-item {
+    display: flex !important;
+    width: 20% !important;
+    flex: 0 0 20% !important;
+    aspect-ratio: 4/3 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    border: 8px solid #b8860b !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    background: #000 !important;
+}
 
 #webcam { width: 100%; display: block; }
 
@@ -39,14 +53,13 @@ body { background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat
 .hidden { display: none !important; }
 
 #thumbnails-container {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    gap: 20px;
-    padding: 20px;
-    align-items: center;
-    flex-grow: 1;
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 #thumbnails-container::-webkit-scrollbar { display: none; }
 
