@@ -32,10 +32,12 @@ body { background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat
 .camera-viewport { width: 80% !important; aspect-ratio: 4/3; }
 
 /* --- RESTAURACIÓN: Reglas de oro (20% ancho, 20px radio, 4:3 aspecto) --- */
+/* Ajuste de ancho estricto al 20% del Viewport (Ancho de pantalla) */
 .carrete-item {
-    display: flex !important;
-    width: 20% !important;
-    flex: 0 0 20% !important;
+    display: inline-block !important;
+    vertical-align: top;
+    width: 20vw !important;
+    flex: 0 0 20vw !important;
     aspect-ratio: 4/3 !important;
     margin: 0 !important;
     box-sizing: border-box !important;
