@@ -15,16 +15,53 @@ body { background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat
 .controls-bar { display: flex; flex-direction: column; align-items: center; gap: 144px; padding: 20px 0; }
 .row { display: flex; justify-content: center; gap: 20px; width: 100%; }
 
-.camera-viewport { position: relative; width: 80%; max-width: 800px; aspect-ratio: 4/3; margin: 10px auto 20px auto; border: 8px solid #b8860b; border-radius: 40px; overflow: hidden; }
+/* --- LIMPIEZA TOTAL: Eliminación de reglas duplicadas y redundantes --- */
+
+/* Estandarización robusta: Marco sólido con efecto de luz via box-shadow */
+.camera-viewport, .carrete-item, .rejilla-item, #comparison-view .rejilla-item.expanded {
+    border: 8px solid #b8860b !important;
+    border-radius: 20px !important;
+    box-shadow: inset 0 0 10px #fceabb, 0 0 10px rgba(0,0,0,0.5) !important;
+    overflow: hidden !important;
+    background: #000 !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Tamaños porcentuales exactos */
+.camera-viewport { width: 80% !important; aspect-ratio: 4/3; }
+.carrete-item { width: 16% !important; aspect-ratio: 4/3; }
+
 #webcam { width: 100%; display: block; }
 
 #countdown-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; pointer-events: none; }
 #countdown-number { font-size: 7rem; color: #FFD700; font-weight: bold; text-shadow: 2px 2px 4px #000; }
 .hidden { display: none !important; }
 
-#thumbnails-container { display: flex; overflow-x: auto; gap: 48px; padding: 30px; width: 95%; min-height: 200px; align-items: center; flex-grow: 1; }
+#thumbnails-container {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 20px;
+    padding: 20px;
+    align-items: center;
+    flex-grow: 1;
+}
+#thumbnails-container::-webkit-scrollbar { display: none; }
+
 .nav-btn { height: 100%; width: 60px; background: rgba(0,0,0,0.3); border: none; color: #b8860b; font-size: 3rem; cursor: pointer; z-index: 20; }
-.thumbnail-item { position: relative; min-width: 200px; height: 200px; border-radius: 20px; border: 4px solid #b8860b; overflow: hidden; flex-shrink: 0; aspect-ratio: var(--aspect-x) / var(--aspect-y); }
+
+.carrete-item img, .carrete-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Aplicación a elementos */
+.thumbnail-item.carrete-item { @extend .marco-item; }
+.thumbnail-item.rejilla-item { @extend .marco-item; }
+.thumbnail-item { position: relative; border: 4px solid #b8860b; border-radius: 20px; overflow: hidden; flex-shrink: 0; aspect-ratio: var(--aspect-x) / var(--aspect-y); }
 .thumbnail-item img, .thumbnail-item video { width: 100%; height: 100%; object-fit: contain; }
 .thumb-actions { position: absolute; bottom: 0; width: 100%; display: flex; justify-content: space-between; background: none; padding: 10px; z-index: 10; }
 .thumb-actions button { background: none; border: none; font-size: 2.5rem; cursor: pointer; padding: 5px 15px; }
@@ -46,13 +83,100 @@ body { background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat
 
 .kiosco-container { display: flex; flex-direction: column; height: 100vh; justify-content: space-between; padding: 20px; }
 
-#comparison-view { position: fixed; inset: 0; background: #222; z-index: 1000; display: none; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; padding: 60px 20px 20px 20px; align-items: center; justify-items: center; }
-#comparison-view.active { display: grid; }
-#comparison-view .thumbnail-item { width: 80%; aspect-ratio: var(--aspect-x) / var(--aspect-y); border: 4px solid #b8860b; }
-#comparison-view .thumbnail-item img, #comparison-view .thumbnail-item video { object-fit: contain; width: 100%; height: 100%; }
-#comparison-view .thumbnail-item.expanded { grid-column: span 2; grid-row: span 2; width: 95vw; height: 95vh; margin: auto; z-index: 100; }
-.close-grid { position: absolute; top: 20px; right: 30px; font-size: 4rem; color: #b8860b; cursor: pointer; z-index: 1001; }
+/* --- POSICIONAMIENTO MATEMÁTICO ABSOLUTO --- */
+#comparison-view {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+}
+#comparison-view.active { display: block; }
 
+/* --- POSICIONAMIENTO MATEMÁTICO ABSOLUTO RESTAURADO --- */
+.comparison-header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    color: #b8860b;
+    font-weight: 900;
+    text-transform: uppercase;
+}
 
+#comparison-view .grid-items {
+    position: absolute;
+    top: 20%;
+    height: 65%;
+    width: 96%;
+    left: 2%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2%;
+}
 
-.close-grid { position: absolute; top: 20px; right: 30px; font-size: 4rem; color: #b8860b; cursor: pointer; z-index: 1001; }
+.close-grid { position: absolute; top: 20px; right: 30px; font-size: 4rem; color: #b8860b; cursor: pointer; z-index: 101; padding: 20px; }
+
+/* Corrección de la falla: Forzar que el hijo sea absoluto dentro del contenedor */
+.rejilla-item {
+    position: relative !important;
+    width: 48% !important;
+    aspect-ratio: 4/3 !important;
+    margin: 0 !important;
+}
+
+.rejilla-item img, .rejilla-item video {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: inherit !important;
+}
+
+/* Solución al elemento fantasma: Ocultar hermanos al expandir */
+#comparison-view .grid-items.has-expanded .rejilla-item:not(.expanded) {
+    display: none !important;
+}
+
+/* Forzar que el expandido no ocupe espacio físico en el grid padre */
+#comparison-view .rejilla-item.expanded {
+    width: 96% !important;
+    height: auto !important;
+    position: fixed !important;
+    top: 50% !important; left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 10000 !important;
+    float: none !important;
+    pointer-events: auto !important;
+}
+
+#comparison-view .comparison-footer {
+    position: absolute;
+    top: 85%;
+    height: 15%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.item-grid img, .item-grid video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.item-grid img, .item-grid video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+

@@ -30,7 +30,8 @@
 
     function resetIdleTimer() { clearTimeout(idleTimer); idleTimer = setTimeout(() => { if (ss) ss.classList.remove('hidden'); }, 60000); }
     function updateFavorites() {
-        const items = Array.from(container.querySelectorAll('.thumbnail-item'));
+
+        const items = Array.from(container.querySelectorAll('.thumbnail-item, .carrete-item'));
         items.forEach((item, index) => {
             const btn = item.querySelector('.btn-fav');
             if (btn) {
@@ -42,8 +43,8 @@
     }
 
     function createThumbHTML(contentHTML) {
-        // Aseguramos que el botón sea visible y tenga contenido inicial
-        return `${contentHTML}<div class="thumb-actions"><button onclick="this.parentElement.parentElement.remove(); updateFavorites()">🗑️</button><button class="btn-fav" style="color: #fff;" onclick="this.classList.toggle('fav-active'); this.textContent = this.classList.contains('fav-active') ? '★' : '☆'; updateFavorites()">☆</button></div>`;
+        // Eliminamos estilos inline para dejar que el CSS tome el control total
+        return `${contentHTML}<div class="thumb-actions"><button onclick="this.parentElement.parentElement.remove(); updateFavorites()">🗑️</button><button class="btn-fav" onclick="this.classList.toggle('fav-active'); this.textContent = this.classList.contains('fav-active') ? '★' : '☆'; updateFavorites()">☆</button></div>`;
     }
 
     async function startCountdown(isVideo) {
@@ -71,7 +72,7 @@
         mediaRecorder.ondataavailable = e => chunks.push(e.data);
         mediaRecorder.onstop = () => {
             const div = document.createElement('div');
-            div.className = 'thumbnail-item is-video';
+            div.className = 'marco-item carrete-item';
             div.innerHTML = createThumbHTML(`<video src="${URL.createObjectURL(new Blob(chunks, {type: 'video/webm'}))}" muted loop playsinline autoplay></video>`);
             container.appendChild(div);
             container.scrollLeft = container.scrollWidth; // Scroll a la derecha
@@ -100,7 +101,7 @@
         ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
 
         const div = document.createElement('div');
-        div.className = 'thumbnail-item';
+        div.className = 'marco-item carrete-item';
         div.innerHTML = createThumbHTML(`<img src="${canvas.toDataURL('image/jpeg', 0.85)}">`);
         container.appendChild(div);
         container.scrollLeft = container.scrollWidth; // Scroll a la derecha
@@ -113,20 +114,84 @@
     function toggleComparison() {
         const compView = document.getElementById('comparison-view');
         const container = document.getElementById('thumbnails-container');
+
         if (compView.classList.contains('active')) {
             compView.classList.remove('active');
         } else {
+            console.log("DEBUG: Ejecutando versión reconstruida de la rejilla");
             const gridItems = compView.querySelector('.grid-items');
             gridItems.innerHTML = '';
-            const items = Array.from(container.querySelectorAll('.thumbnail-item')).slice(-4);
+
+            // Aseguramos el Header
+            let header = compView.querySelector('.comparison-header');
+            if (!header) {
+                header = document.createElement('div');
+                header.className = 'comparison-header';
+                compView.prepend(header);
+            }
+            header.textContent = 'ÓPTICA ECO - V2';
+
+            // Filtramos favoritos o últimos 4 elementos
+            const items = Array.from(container.querySelectorAll('.carrete-item'))
+                               .filter(item => item.querySelector('.btn-fav.fav-active'))
+                               .slice(-4);
+
             items.forEach(item => {
-                const clone = item.cloneNode(true);
-                // Listener de expansión limpio
-                clone.addEventListener('click', (e) => {
-                    if(e.target.tagName !== 'BUTTON') clone.classList.toggle('expanded');
-                });
-                gridItems.appendChild(clone);
+                const media = item.querySelector('img, video');
+                const newDiv = document.createElement('div');
+                newDiv.className = 'rejilla-item';
+
+                // Reconstruir contenido multimedia
+                const mediaClone = media.cloneNode(true);
+                mediaClone.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+                newDiv.appendChild(mediaClone);
+
+                // Reconstruir botones de acción
+                const actions = item.querySelector('.thumb-actions');
+                if (actions) {
+                    const actionsClone = actions.cloneNode(true);
+                    newDiv.appendChild(actionsClone);
+                }
+                newDiv.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') return;
+
+                    const isExpanded = newDiv.classList.contains('expanded');
+                    const compView = document.getElementById('comparison-view');
+                    const gridItems = compView.querySelector('.grid-items');
+
+                    if (!isExpanded) {
+                        // Sacar del grid y poner en la raíz de comparison-view
+                    document.querySelectorAll('.rejilla-item').forEach(el => el.classList.remove('expanded'));
+                        newDiv.classList.add('expanded');
+                        compView.appendChild(newDiv);
+                    } else {
+                        // Regresar al grid
+                        newDiv.classList.remove('expanded');
+                        gridItems.appendChild(newDiv);
+                    }
             });
+                gridItems.appendChild(newDiv);
+            });
+
+            // Botones inferiores fijos
+            let footer = compView.querySelector('.comparison-footer');
+            if (!footer) {
+                footer = document.createElement('div');
+            footer.className = 'comparison-footer';
+                compView.appendChild(footer);
+            }
+            footer.innerHTML = '';
+
+            const btnWhatsapp = document.createElement('button');
+            btnWhatsapp.className = 'btn-oro';
+            btnWhatsapp.innerHTML = '<img src="img/qr_icon.png" style="height:50px; margin-right:10px;"> WHATSAPP';
+            footer.appendChild(btnWhatsapp);
+
+            const btnCerrar = document.createElement('button');
+            btnCerrar.className = 'btn-oro';
+            btnCerrar.textContent = 'CERRAR';
+            btnCerrar.addEventListener('click', toggleComparison);
+            footer.appendChild(btnCerrar);
             compView.classList.add('active');
         }
     }
@@ -149,25 +214,23 @@
         } catch (err) { log('Error cámara: ' + err.message); }
     }
     initCamera();
+})();
 
-    // Listener de sistema protegido (No modificar)
-    (function initScreensaverProtection() {
-        const ss = document.getElementById('screensaver');
-        if (!ss) return;
+// Listener de sistema protegido (Fuera del IIFE principal para mayor seguridad)
+(function initScreensaverProtection() {
+    const ss = document.getElementById('screensaver');
+    if (!ss) return;
 
-        const handleExit = (e) => {
-            if (!ss.classList.contains('hidden')) {
+    const handleExit = (e) => {
+        if (!ss.classList.contains('hidden')) {
             ss.classList.add('hidden');
-                if (typeof resetIdleTimer === 'function') resetIdleTimer();
-                e.preventDefault();
-                e.stopPropagation();
-                }
-        };
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
 
-        ['mousedown', 'touchstart', 'pointerup', 'keydown'].forEach(evt => {
-            document.addEventListener(evt, handleExit, { capture: true, passive: false });
-        });
+    ['mousedown', 'touchstart', 'pointerup', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, handleExit, { capture: true, passive: false });
+    });
 })();
-})();
-
 
