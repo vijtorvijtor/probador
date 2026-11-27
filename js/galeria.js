@@ -1,221 +1,390 @@
-// probador/js/galeria.js - Enfoque 90% con Hueco Vacío Óptica ECO
-
-document.addEventListener('DOMContentLoaded', () => {
-    const thumbnailsContainer = document.getElementById('thumbnails-container');
-    const photoCountEl = document.getElementById('photo-count');
-    const btnClearAll = document.getElementById('btn-clear-all');
-    const comparisonModal = document.getElementById('comparison-modal');
-    const gridContainer = document.getElementById('grid-favorites-container');
-    const btnCloseGrid = document.getElementById('btn-close-grid');
-
-    let photos = [];
-    let focusedPhotoId = null;
-
-    window.addEventListener('photoCaptured', (e) => {
-        if (e.detail && e.detail.image) {
-            addPhotoToGallery(e.detail.image, e.detail.type || 'image');
-        }
-    });
-
-    function addPhotoToGallery(src, type) {
-        photos.push({
-            id: Date.now(),
-            src: src,
-            type: type,
-            isFavorite: false
-        });
-        renderGallery();
-    }
-
-    function renderGallery() {
-        if (!thumbnailsContainer) return;
-        thumbnailsContainer.innerHTML = '';
-        if (photoCountEl) photoCountEl.textContent = photos.length;
-
-        photos.forEach((photo) => {
-            const card = document.createElement('div');
-            card.className = 'thumb-card' + (photo.isFavorite ? ' favorite' : '');
-            
-            let mediaTag = (photo.type === 'video') 
-                ? '<video src="' + photo.src + '" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>'
-                : '<img src="' + photo.src + '" style="width:100%; height:100%; object-fit:cover;">';
-
-            const favClass = photo.isFavorite ? 'btn-icon btn-fav active' : 'btn-icon btn-fav';
-            const favIcon = photo.isFavorite ? '★' : '☆';
-
-            card.innerHTML = mediaTag + 
-                '<div class="thumb-actions">' +
-                    '<button class="' + favClass + '">' + favIcon + '</button>' +
-                    '<button class="btn-icon btn-delete">🗑</button>' +
-                '</div>';
-
-            card.querySelector('.btn-fav').addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                toggleFavorite(photo.id);
-            });
-
-            card.querySelector('.btn-delete').addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                deletePhoto(photo.id);
-            });
-
-            thumbnailsContainer.appendChild(card);
-        });
-    }
-
-    function toggleFavorite(id) {
-        const photo = photos.find(p => p.id === id);
-        if (!photo) return;
-
-        const currentFavs = photos.filter(p => p.isFavorite).length;
-        if (!photo.isFavorite && currentFavs >= 4) {
-            alert("Máximo 4 favoritas permitidas para comparar.");
-            return;
-        }
-
-        photo.isFavorite = !photo.isFavorite;
-        renderGallery();
-        
-        if (comparisonModal && !comparisonModal.classList.contains('hidden')) {
-            renderComparisonGrid();
-        }
-    }
-
-    function deletePhoto(id) {
-        photos = photos.filter(p => p.id !== id);
-        renderGallery();
-        if (comparisonModal && !comparisonModal.classList.contains('hidden')) {
-            renderComparisonGrid();
-        }
-    }
-
-    function renderComparisonGrid() {
-        if (!gridContainer) return;
-        const favorites = photos.filter(p => p.isFavorite);
-        gridContainer.innerHTML = '';
-
-        if (favorites.length === 0) {
-            gridContainer.className = '';
-            gridContainer.style.display = 'block';
-            gridContainer.innerHTML = '<p style="color:#AAA; font-size:13px; text-align:center; padding:30px 0;">Selecciona al menos una opción con la estrella (★) para comparar.</p>';
-            return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'comparison-wrapper';
-
-        const baseGrid = document.createElement('div');
-        // Asignar clase de diseño según la cantidad de fotos elegidas (1, 2, 3 o 4)
-        const totalFavs = favorites.length;
-        baseGrid.className = 'grid-container-base grid-layout-' + totalFavs;
-
-        // DIBUJAR CUADRÍCULA BASE
-        favorites.forEach((fav) => {
-            const item = document.createElement('div');
-
-            if (focusedPhotoId === fav.id) {
-                item.className = 'grid-item-card empty-slot';
-                item.innerHTML = '<span>SELECCIONADO</span>';
-                item.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    focusedPhotoId = null;
-                    renderComparisonGrid();
-                });
-            } else {
-                item.className = 'grid-item-card';
-
-                let mediaTag = (fav.type === 'video')
-                    ? '<video src="' + fav.src + '" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>'
-                    : '<img src="' + fav.src + '" style="width:100%; height:100%; object-fit:cover;">';
-
-                item.innerHTML = mediaTag;
-
-                item.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    focusedPhotoId = fav.id;
-                    renderComparisonGrid();
-                });
-            }
-
-            baseGrid.appendChild(item);
-        });
-
-        wrapper.appendChild(baseGrid);
-
-        // CAPA DEL 90% DE ENFOQUE
-        if (focusedPhotoId) {
-            const focusedPhoto = favorites.find(f => f.id === focusedPhotoId);
-            if (focusedPhoto) {
-                const overlay = document.createElement('div');
-                overlay.className = 'overlay-focus-container';
-
-                const focusCard = document.createElement('div');
-                focusCard.className = 'focus-card-90';
-
-                let mediaTagFocused = (focusedPhoto.type === 'video')
-                    ? '<video src="' + focusedPhoto.src + '" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>'
-                    : '<img src="' + focusedPhoto.src + '" style="width:100%; height:100%; object-fit:cover;">';
-
-                const btnUndo = document.createElement('button');
-                btnUndo.className = 'btn-undo';
-                btnUndo.innerHTML = '↩';
-                btnUndo.title = 'Volver a la cuadrícula';
-                btnUndo.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    focusedPhotoId = null;
-                    renderComparisonGrid();
-                });
-
-                focusCard.innerHTML = mediaTagFocused;
-                focusCard.appendChild(btnUndo);
-
-                focusCard.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    focusedPhotoId = null;
-                    renderComparisonGrid();
-                });
-
-                overlay.appendChild(focusCard);
-                wrapper.appendChild(overlay);
-            }
-        }
-
-        gridContainer.appendChild(wrapper);
-    }
-
-    if (comparisonModal) {
-        comparisonModal.addEventListener('click', (e) => {
-            if (e.target === comparisonModal) {
-                focusedPhotoId = null;
-                comparisonModal.classList.add('hidden');
-            }
-        });
-    }
-
-    window.openComparison = function() {
-        focusedPhotoId = null;
-        renderComparisonGrid();
-        if (comparisonModal) {
-            comparisonModal.classList.remove('hidden');
-        }
+/**
+ * js/galeria.js - Controlador Unificado de Carrete, Rejilla 2x2 y Vista Maximizada HD
+ * Óptica ECO - Optimizado para Raspberry Pi 4
+ */
+(function() {
+    const state = {
+        items: [], // { id, type, ruta_baja, ruta_alta, file_hd, file_proxy, isFavorite, blobUrlBaja, blobUrlAlta }
+        activeSlotIndex: null,
+        isMaximizedOpen: false
     };
 
-    if (btnCloseGrid) {
-        btnCloseGrid.addEventListener('click', () => {
-            focusedPhotoId = null;
-            if (comparisonModal) comparisonModal.classList.add('hidden');
+    const els = {};
+
+    function cacheElements() {
+        els.thumbnailsContainer = document.getElementById('thumbnails-container');
+        els.carretePrev = document.getElementById('carrete-prev');
+        els.carreteNext = document.getElementById('carrete-next');
+        els.comparisonView = document.getElementById('comparison-view');
+        els.grid2x2 = document.getElementById('comparison-grid-2x2');
+        els.btnCloseComparison = document.getElementById('btn-close-comparison');
+        els.btnCompareClose = document.getElementById('btn-compare-close');
+        els.btnCompareWhatsapp = document.getElementById('btn-compare-whatsapp');
+        els.maximizedView = document.getElementById('maximized-view');
+        els.maximizedViewport = document.getElementById('maximized-viewport');
+        els.maximizedStage = document.getElementById('maximized-media-stage');
+        els.btnCloseMaximized = document.getElementById('btn-close-maximized');
+        els.btnCompare = document.getElementById('btn-compare');
+        els.btnCleanAll = document.getElementById('clean-all');
+        els.btnGenerateQr = document.getElementById('btn-generate-qr');
+        els.qrModal = document.getElementById('qr-modal');
+        els.btnCloseQr = document.getElementById('btn-close-qr');
+        els.qrImageWrapper = document.getElementById('qr-image-wrapper');
+        els.qrUrlLabel = document.getElementById('qr-url-label');
+    }
+
+    function createMediaHTML(src, type, isLiveOrMaximized) {
+        if (type === 'video') {
+            // En carrete y rejilla 2x2 el video permanece pausado en primer cuadro para cuidar CPU/GPU en Raspberry Pi 4
+            if (isLiveOrMaximized) {
+                return `<video src="${src}" class="media-content" autoplay loop muted playsinline></video>`;
+            }
+            return `<video src="${src}#t=0.05" class="media-content" preload="metadata" muted playsinline></video>`;
+        }
+        return `<img src="${src}" class="media-content" draggable="false" alt="Captura Óptica ECO">`;
+    }
+
+    function autoAssignLastFourFavorites() {
+        // Al agregar una nueva captura, si hay <= 4 todas son favoritas; si hay > 4 mantenemos las últimas 4 activas
+        const total = state.items.length;
+        state.items.forEach((item, idx) => {
+            item.isFavorite = (idx >= total - 4);
         });
     }
 
-    if (btnClearAll) {
-        btnClearAll.addEventListener('click', () => {
-            if (photos.length === 0) return;
-            if (confirm("¿Deseas eliminar todas las fotografías tomadas?")) {
-                photos = [];
-                focusedPhotoId = null;
-                renderGallery();
-                if (comparisonModal) comparisonModal.classList.add('hidden');
-            }
-        });
+    function addMediaItem(detail) {
+        const id = detail.id || (Date.now() + Math.floor(Math.random() * 1000));
+        const item = {
+            id,
+            type: detail.type || 'img',
+            ruta_baja: detail.ruta_baja || detail.src,
+            ruta_alta: detail.ruta_alta || detail.src,
+            file_hd: detail.file_hd || detail.file || '',
+            file_proxy: detail.file_proxy || '',
+            blobUrlBaja: detail.blobUrlBaja || null,
+            blobUrlAlta: detail.blobUrlAlta || null,
+            isFavorite: true
+        };
+        state.items.push(item);
+        autoAssignLastFourFavorites();
+        renderCarrete(true);
+        if (els.comparisonView && els.comparisonView.classList.contains('active')) {
+            renderRejilla2x2();
+        }
+        return item;
     }
-});
+
+    function updateMediaPaths(id, serverData) {
+        const item = state.items.find(i => i.id === id);
+        if (!item || !serverData) return;
+        if (serverData.ruta_baja) item.ruta_baja = serverData.ruta_baja;
+        if (serverData.ruta_alta) item.ruta_alta = serverData.ruta_alta;
+        if (serverData.file_hd || serverData.file) item.file_hd = serverData.file_hd || serverData.file;
+        if (serverData.file_proxy) item.file_proxy = serverData.file_proxy;
+    }
+
+    function renderCarrete(scrollToEnd = false) {
+        if (!els.thumbnailsContainer) return;
+        els.thumbnailsContainer.innerHTML = '';
+
+        state.items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'marco-dorado carrete-item' + (item.isFavorite ? ' is-fav' : '');
+            card.setAttribute('data-rol', 'carrete');
+            card.setAttribute('data-id', item.id);
+
+            if (window.GestorMedios && window.GestorMedios.metrics.carrete) {
+                window.GestorMedios.aplicarVariablesElem(card, window.GestorMedios.metrics.carrete);
+            }
+
+            const favActiveClass = item.isFavorite ? 'fav-active' : '';
+            const favSymbol = item.isFavorite ? '★' : '☆';
+
+            card.innerHTML = `
+                <div class="marco-inner">
+                    ${createMediaHTML(item.ruta_baja, item.type, false)}
+                    <div class="thumb-actions">
+                        <button type="button" class="btn-delete" title="Eliminar">🗑️</button>
+                        <button type="button" class="btn-fav ${favActiveClass}" title="Favorita">${favSymbol}</button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.btn-delete').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteMediaItem(item.id);
+            });
+
+            card.querySelector('.btn-fav').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFavorite(item.id);
+            });
+
+            els.thumbnailsContainer.appendChild(card);
+        });
+
+        if (scrollToEnd) {
+            els.thumbnailsContainer.scrollLeft = els.thumbnailsContainer.scrollWidth;
+        }
+    }
+
+
+    function toggleFavorite(id) {
+        const item = state.items.find(p => p.id === id);
+        if (!item) return;
+
+        const currentFavs = state.items.filter(p => p.isFavorite).length;
+        if (!item.isFavorite && currentFavs >= 4) {
+            const oldestFav = state.items.find(p => p.isFavorite);
+            if (oldestFav) oldestFav.isFavorite = false;
+        }
+
+        item.isFavorite = !item.isFavorite;
+        renderCarrete(false);
+        if (els.comparisonView && els.comparisonView.classList.contains('active')) {
+            renderRejilla2x2();
+        }
+    }
+
+    async function deleteMediaItem(id) {
+        const idx = state.items.findIndex(p => p.id === id);
+        if (idx === -1) return;
+        const removed = state.items[idx];
+
+        if (removed.blobUrlBaja) URL.revokeObjectURL(removed.blobUrlBaja);
+        if (removed.blobUrlAlta) URL.revokeObjectURL(removed.blobUrlAlta);
+
+        state.items.splice(idx, 1);
+        renderCarrete(false);
+        if (els.comparisonView && els.comparisonView.classList.contains('active')) {
+            closeMaximizedView();
+            renderRejilla2x2();
+        }
+
+        if (removed.file_hd && window.KIOSCO_SESSION_TOKEN) {
+            try {
+                await fetch('eliminar_foto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: window.KIOSCO_SESSION_TOKEN,
+                        foto: removed.file_hd,
+                        foto_proxy: removed.file_proxy || ''
+                    })
+                });
+            } catch (err) {}
+        }
+    }
+
+    async function clearAllMedia() {
+        if (state.items.length === 0) return;
+        closeMaximizedView();
+        state.items.forEach(it => {
+            if (it.blobUrlBaja) URL.revokeObjectURL(it.blobUrlBaja);
+            if (it.blobUrlAlta) URL.revokeObjectURL(it.blobUrlAlta);
+        });
+        state.items = [];
+        renderCarrete(false);
+        if (els.comparisonView) els.comparisonView.classList.remove('active');
+
+        if (window.KIOSCO_SESSION_TOKEN) {
+            try {
+                await fetch('eliminar_foto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: window.KIOSCO_SESSION_TOKEN, foto: '__ALL__' })
+                });
+            } catch (e) {}
+        }
+    }
+
+    function getActiveFourForGrid() {
+        const favs = state.items.filter(p => p.isFavorite);
+        if (favs.length > 0) return favs.slice(-4);
+        return state.items.slice(-4);
+    }
+
+    function renderRejilla2x2() {
+        if (!els.grid2x2) return;
+        els.grid2x2.innerHTML = '';
+        els.grid2x2.classList.remove('grid-locked');
+
+        const activeItems = getActiveFourForGrid();
+
+        for (let slotIdx = 0; slotIdx < 4; slotIdx++) {
+            const mediaItem = activeItems[slotIdx] || null;
+            const slotEl = document.createElement('div');
+            slotEl.setAttribute('data-rol', 'rejilla');
+            slotEl.setAttribute('data-slot', slotIdx);
+
+            if (window.GestorMedios && window.GestorMedios.metrics.rejilla) {
+                window.GestorMedios.aplicarVariablesElem(slotEl, window.GestorMedios.metrics.rejilla);
+            }
+
+            if (mediaItem) {
+                slotEl.className = 'marco-dorado rejilla-item';
+                slotEl.setAttribute('data-id', mediaItem.id);
+                slotEl.innerHTML = `
+                    <div class="marco-inner">
+                        ${createMediaHTML(mediaItem.ruta_baja, mediaItem.type, false)}
+                    </div>
+                `;
+                slotEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (state.isMaximizedOpen) return;
+                    openMaximizedView(mediaItem, slotEl, slotIdx);
+                });
+            } else {
+                slotEl.className = 'rejilla-slot-placeholder';
+            }
+
+            els.grid2x2.appendChild(slotEl);
+        }
+    }
+
+    function openMaximizedView(mediaItem, slotEl, slotIdx) {
+        if (state.isMaximizedOpen || !els.maximizedView || !els.maximizedStage) return;
+        state.isMaximizedOpen = true;
+        state.activeSlotIndex = slotIdx;
+
+        if (slotEl) {
+            slotEl.style.visibility = 'hidden';
+            slotEl.classList.add('slot-hidden-hole');
+        }
+        if (els.grid2x2) {
+            els.grid2x2.classList.add('grid-locked');
+        }
+
+        if (window.GestorMedios) {
+            window.GestorMedios.recalcularGeometria();
+            if (window.GestorMedios.metrics.maximizada) {
+                window.GestorMedios.aplicarVariablesElem(els.maximizedView, window.GestorMedios.metrics.maximizada);
+            }
+        }
+
+        els.maximizedStage.innerHTML = createMediaHTML(mediaItem.ruta_alta, mediaItem.type, true);
+        els.maximizedView.classList.remove('hidden');
+
+        if (window.GestorMedios) {
+            window.GestorMedios.bindMaximizedGestures(els.maximizedViewport, els.maximizedStage);
+            window.GestorMedios.resetZoomPan();
+        }
+    }
+
+    function closeMaximizedView() {
+        if (!els.maximizedView) return;
+
+        if (window.GestorMedios) {
+            window.GestorMedios.resetZoomPan();
+        }
+
+        if (els.maximizedStage) {
+            const hdMedia = els.maximizedStage.querySelector('img, video');
+            if (hdMedia) {
+                if (hdMedia.tagName === 'VIDEO') hdMedia.pause();
+                hdMedia.removeAttribute('src');
+                if (typeof hdMedia.load === 'function') hdMedia.load();
+            }
+            els.maximizedStage.innerHTML = '';
+        }
+
+        els.maximizedView.classList.add('hidden');
+
+        if (els.grid2x2) {
+            els.grid2x2.querySelectorAll('.slot-hidden-hole').forEach(el => {
+                el.style.visibility = 'visible';
+                el.classList.remove('slot-hidden-hole');
+            });
+            els.grid2x2.classList.remove('grid-locked');
+        }
+
+        state.isMaximizedOpen = false;
+        state.activeSlotIndex = null;
+    }
+
+    function openComparisonView() {
+        if (!els.comparisonView) return;
+        closeMaximizedView();
+        renderRejilla2x2();
+        els.comparisonView.classList.add('active');
+        if (window.GestorMedios) window.GestorMedios.recalcularGeometria();
+    }
+
+    function closeComparisonView() {
+        closeMaximizedView();
+        if (els.comparisonView) els.comparisonView.classList.remove('active');
+    }
+
+    function toggleComparisonView() {
+        if (!els.comparisonView) return;
+        if (els.comparisonView.classList.contains('active')) {
+            closeComparisonView();
+        } else {
+            openComparisonView();
+        }
+    }
+
+    function showWhatsAppQR() {
+        if (!els.qrModal || !els.qrImageWrapper) return;
+        const token = window.KIOSCO_SESSION_TOKEN || '';
+        const galleryUrl = new URL('galeria.php?token=' + encodeURIComponent(token), window.location.href).href;
+        const qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(galleryUrl);
+
+        els.qrImageWrapper.innerHTML = `<img src="${qrApiUrl}" alt="Código QR WhatsApp" class="qr-code-img">`;
+        if (els.qrUrlLabel) els.qrUrlLabel.textContent = galleryUrl;
+        els.qrModal.classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        cacheElements();
+
+        if (els.carretePrev && els.thumbnailsContainer) {
+            els.carretePrev.addEventListener('click', () => {
+                const step = (window.GestorMedios?.metrics?.carrete?.wFoto || 280) + 20;
+                els.thumbnailsContainer.scrollBy({ left: -step, behavior: 'smooth' });
+            });
+        }
+        if (els.carreteNext && els.thumbnailsContainer) {
+            els.carreteNext.addEventListener('click', () => {
+                const step = (window.GestorMedios?.metrics?.carrete?.wFoto || 280) + 20;
+                els.thumbnailsContainer.scrollBy({ left: step, behavior: 'smooth' });
+            });
+        }
+
+        if (els.btnCloseMaximized) {
+            els.btnCloseMaximized.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeMaximizedView();
+            });
+        }
+
+        if (els.btnCompare) els.btnCompare.addEventListener('click', toggleComparisonView);
+        if (els.btnCloseComparison) els.btnCloseComparison.addEventListener('click', closeComparisonView);
+        if (els.btnCompareClose) els.btnCompareClose.addEventListener('click', closeComparisonView);
+
+        if (els.btnGenerateQr) els.btnGenerateQr.addEventListener('click', showWhatsAppQR);
+        if (els.btnCompareWhatsapp) els.btnCompareWhatsapp.addEventListener('click', showWhatsAppQR);
+        if (els.btnCloseQr && els.qrModal) {
+            els.btnCloseQr.addEventListener('click', () => els.qrModal.classList.add('hidden'));
+        }
+        if (els.btnCleanAll) {
+            els.btnCleanAll.addEventListener('click', clearAllMedia);
+        }
+
+        window.addEventListener('kioscoMediaCaptured', (e) => {
+            if (e.detail) addMediaItem(e.detail);
+        });
+    });
+
+    window.KioscoGaleria = {
+        addMediaItem,
+        updateMediaPaths,
+        openComparisonView,
+        closeComparisonView,
+        toggleComparisonView,
+        closeMaximizedView,
+        getState: () => state
+    };
+    window.openComparison = toggleComparisonView;
+})();
+

@@ -40,7 +40,7 @@ $fullGalleryUrl =$protocol . $_SERVER['HTTP_HOST'] .$_SERVER['REQUEST_URI'];
         
         .photo-card { background: #121320; border: 2px solid #1F2235; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: all 0.2s ease; }
         .photo-card.favorite { border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        .photo-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
+        .photo-card img, .photo-card video { width: 100%; aspect-ratio: 5/4; object-fit: cover; display: block; }
         
         .card-actions { display: flex; justify-content: space-between; align-items: center; background: #1A1C2E; padding: 12px 15px; border-top: 1px solid #2A2D45; }
         

@@ -1,197 +1,551 @@
-* { box-sizing: border-box; }
-html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
-body { background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat fixed; font-family: sans-serif; }
-
-#screensaver { position: fixed; inset: 0; z-index: 1000; background: #000; transition: opacity 0.4s ease; pointer-events: auto; }
-#screensaver.hidden { opacity: 0; pointer-events: none; }
-#video-screensaver { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-
-.btn-oro { background-image: url('../img/hojaOro.jpg'); background-size: cover; border: 3px solid #b8860b; border-radius: 30px; color: #4a3728; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; text-shadow: 0 1px 0 rgba(255,255,255,0.4); box-shadow: inset 1px 1px 1px rgba(255,255,255,0.6), 0 6px 0 #7d5a0a; display: flex; justify-content: center; align-items: center; cursor: pointer; height: 140px; width: 320px; transition: transform 0.1s; margin: 0 15px; }
-.btn-oro:active { transform: translateY(4px); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.4), 0 2px 0 #7d5a0a; }
-
-#btn-generate-qr { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
-#btn-generate-qr img { height: 70px; width: auto; }
-#clean-all { color: #8B0000; }
-.controls-bar { display: flex; flex-direction: column; align-items: center; gap: 144px; padding: 20px 0; }
-.row { display: flex; justify-content: center; gap: 20px; width: 100%; }
-
-/* --- LIMPIEZA TOTAL: Eliminación de reglas duplicadas y redundantes --- */
-
-/* Estandarización robusta: Marco sólido con efecto de luz via box-shadow */
-.camera-viewport, .carrete-item, .rejilla-item, #comparison-view .rejilla-item.expanded {
-    border: 8px solid #b8860b !important;
-    border-radius: 20px !important;
-    box-shadow: inset 0 0 10px #fceabb, 0 0 10px rgba(0,0,0,0.5) !important;
-    overflow: hidden !important;
-    background: #000 !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
+/**
+ * css/estilos_oro.css - Motor Universal de Presentación de Medios
+ * Renderizado puro por GPU, geometría blindada y marco dorado interior concéntrico
+ */
+:root {
+    --oro-gradiente: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+    --oro-sombra-ext: 0 8px 22px rgba(0, 0, 0, 0.65), 0 0 12px rgba(184, 134, 11, 0.35);
+    --oro-sombra-int: inset 0 1px 2px rgba(255, 255, 255, 0.7), inset 0 -1px 3px rgba(90, 60, 10, 0.8);
 }
 
-/* Tamaños porcentuales exactos */
-.camera-viewport { width: 80% !important; aspect-ratio: 4/3; }
-
-/* --- RESTAURACIÓN: Reglas de oro (20% ancho, 20px radio, 4:3 aspecto) --- */
-/* Ajuste de ancho estricto al 20% del Viewport (Ancho de pantalla) */
-.carrete-item {
-    display: inline-block !important;
-    vertical-align: top;
-    width: 20vw !important;
-    flex: 0 0 20vw !important;
-    aspect-ratio: 4/3 !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    border: 8px solid #b8860b !important;
-    border-radius: 20px !important;
-    overflow: hidden !important;
-    background: #000 !important;
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-#webcam { width: 100%; display: block; }
-
-#countdown-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; pointer-events: none; }
-#countdown-number { font-size: 7rem; color: #FFD700; font-weight: bold; text-shadow: 2px 2px 4px #000; }
-.hidden { display: none !important; }
-
-#thumbnails-container {
-    display: flex !important;
-    overflow-x: auto !important;
-    gap: 0 !important;
-    padding: 0 !important;
-    align-items: center !important;
-    width: 100% !important;
-    height: 100% !important;
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #222 url('../img/FondoCalidoCafe.jpg') center/cover no-repeat fixed;
+    font-family: sans-serif;
 }
-#thumbnails-container::-webkit-scrollbar { display: none; }
 
-.nav-btn { height: 100%; width: 60px; background: rgba(0,0,0,0.3); border: none; color: #b8860b; font-size: 3rem; cursor: pointer; z-index: 20; }
-
-.carrete-item img, .carrete-item video {
+/* Protector de pantalla intacto */
+#screensaver {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #000;
+    transition: opacity 0.4s ease;
+    pointer-events: auto;
+}
+#screensaver.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+#video-screensaver {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
 }
 
-/* Aplicación a elementos */
-.thumbnail-item.carrete-item { @extend .marco-item; }
-.thumbnail-item.rejilla-item { @extend .marco-item; }
-.thumbnail-item { position: relative; border: 4px solid #b8860b; border-radius: 20px; overflow: hidden; flex-shrink: 0; aspect-ratio: var(--aspect-x) / var(--aspect-y); }
-.thumbnail-item img, .thumbnail-item video { width: 100%; height: 100%; object-fit: contain; }
-.thumb-actions { position: absolute; bottom: 0; width: 100%; display: flex; justify-content: space-between; background: none; padding: 10px; z-index: 10; }
-.thumb-actions button { background: none; border: none; font-size: 2.5rem; cursor: pointer; padding: 5px 15px; }
+.hidden {
+    display: none !important;
+}
+
+/* Contenedor general del kiosco */
+.kiosco-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.kiosco-header {
+    position: absolute;
+    top: 1.5vh;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #fcf6ba;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.85), 0 0 12px rgba(184,134,11,0.6);
+    font-size: clamp(1.8rem, 3.5vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   REGLA UNIVERSAL DE MARCO DORADO INTERIOR Y REDONDEO ÁUREO CONCÉNTRICO
+   ========================================================================== */
+.marco-dorado {
+    box-sizing: border-box;
+    width: var(--foto-w);
+    height: var(--foto-h);
+    padding: var(--marco-grosor);
+    border-radius: var(--radio-ext);
+    background: var(--oro-gradiente);
+    box-shadow: var(--oro-sombra-int), var(--oro-sombra-ext);
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.marco-dorado > .marco-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radio-int);
+    overflow: hidden;
+    background: #000;
+    position: relative;
+}
+
+.marco-inner .media-content,
+.marco-inner > img,
+.marco-inner > video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   1. ROL: CÁMARA / MAMPARA (Tríada: ancho%, top%, alineacion)
+   ========================================================================== */
+.camera-viewport[data-rol="camara"] {
+    position: absolute;
+    width: var(--camara-w);
+    height: var(--camara-h);
+    top: var(--camara-top);
+    left: var(--camara-left);
+    padding: var(--camara-marco);
+    border-radius: var(--camara-radio-ext);
+    z-index: 10;
+}
+.camera-viewport[data-rol="camara"] > .marco-inner {
+    border-radius: var(--camara-radio-int);
+}
+
+#webcam {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scaleX(var(--preview-scale-x, -1));
+}
+
+#countdown-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+#countdown-number {
+    font-size: clamp(3.5rem, 7vw, 7rem);
+    color: #FFD700;
+    font-weight: 900;
+    text-shadow: 2px 2px 8px #000;
+}
+
+#flash-overlay {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9500;
+}
+#flash-overlay.flash-animate {
+    animation: flashPulse 0.55s ease-out;
+}
+@keyframes flashPulse {
+    0% { opacity: 0.9; }
+    100% { opacity: 0; }
+}
+
+/* ==========================================================================
+   BARRA DE CONTROLES DORADOS
+   ========================================================================== */
+.controls-bar {
+    position: absolute;
+    top: calc(var(--camara-top) + var(--camara-h) + 1.2vh);
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2vh;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.controls-bar .row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.8vw;
+    width: 100%;
+    pointer-events: auto;
+}
+
+.btn-oro {
+    background-image: url('../img/hojaOro.jpg');
+    background-size: cover;
+    border: 3px solid #b8860b;
+    border-radius: 24px;
+    color: #4a3728;
+    font-weight: 900;
+    font-size: clamp(1rem, 2.2vw, 2rem);
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+    box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.6), 0 5px 0 #7d5a0a, 0 8px 15px rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    height: clamp(54px, 6.2vh, 110px);
+    width: clamp(140px, 26vw, 300px);
+    transition: transform 0.1s ease;
+    padding: 0 12px;
+}
+.btn-oro:active {
+    transform: translateY(3px);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4), 0 2px 0 #7d5a0a;
+}
+
+#btn-generate-qr img,
+#btn-compare-whatsapp img {
+    height: 60%;
+    width: auto;
+    object-fit: contain;
+}
+#clean-all {
+    color: #8B0000;
+}
+
+
+/* ==========================================================================
+   2. ROL: CARRETE (1 solo renglón horizontal con flechas laterales)
+   ========================================================================== */
+.carrete-row-section {
+    position: absolute;
+    top: var(--carrete-top);
+    left: 0;
+    width: 100vw;
+    height: var(--carrete-h);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    z-index: 20;
+}
+
+.nav-btn {
+    width: var(--flecha-margen-px);
+    min-width: 44px;
+    height: var(--carrete-h);
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(184, 134, 11, 0.45);
+    color: #fcf6ba;
+    font-size: clamp(1.8rem, 3.2vw, 3rem);
+    cursor: pointer;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.nav-btn:active {
+    background: rgba(184, 134, 11, 0.35);
+}
+
+#thumbnails-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: var(--carrete-justify, flex-start);
+    gap: var(--gap-px);
+    width: calc(100vw - (2 * var(--flecha-margen-px)));
+    height: var(--carrete-h);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+#thumbnails-container::-webkit-scrollbar {
+    display: none;
+}
+
+.carrete-item[data-rol="carrete"] {
+    width: var(--carrete-w);
+    height: var(--carrete-h);
+    padding: var(--carrete-marco);
+    border-radius: var(--carrete-radio-ext);
+    flex: 0 0 var(--carrete-w);
+}
+.carrete-item[data-rol="carrete"] > .marco-inner {
+    border-radius: var(--carrete-radio-int);
+}
+
+.thumb-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.72), transparent);
+    z-index: 10;
+}
+.thumb-actions button {
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    border-radius: 50%;
+    width: clamp(36px, 4vw, 52px);
+    height: clamp(36px, 4vw, 52px);
+    font-size: clamp(1.2rem, 2.2vw, 2rem);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.thumb-actions .btn-fav.fav-active {
+    color: #FFD700;
+    background: rgba(40, 30, 5, 0.85);
+    border-color: #FFD700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+}
 
 #debug-log {
     position: fixed;
     top: 10px;
     left: 10px;
-    width: 300px;
-    max-height: 200px;
-    background: rgba(0, 0, 0, 0.7);
+    width: 260px;
+    max-height: 140px;
+    background: rgba(0, 0, 0, 0.55);
     color: #fff;
     font-size: 10px;
     z-index: 10000;
     pointer-events: none;
     overflow: hidden;
     padding: 5px;
+    display: none;
 }
 
-.kiosco-container { display: flex; flex-direction: column; height: 100vh; justify-content: space-between; padding: 20px; }
-
-/* --- POSICIONAMIENTO MATEMÁTICO ABSOLUTO --- */
+/* ==========================================================================
+   3. ROL: REJILLA COMPARADORA (2x2 FIJA DE 4 SLOTS)
+   ========================================================================== */
 #comparison-view {
     display: none;
     position: fixed;
     inset: 0;
-    background: #000;
-    z-index: 9999;
+    background: rgba(10, 8, 6, 0.96);
+    z-index: 9000;
+    overflow: hidden;
 }
-#comparison-view.active { display: block; }
+#comparison-view.active {
+    display: block;
+}
 
-/* --- POSICIONAMIENTO MATEMÁTICO ABSOLUTO RESTAURADO --- */
 .comparison-header {
     position: absolute;
-    top: 0;
+    top: 2vh;
+    left: 0;
     width: 100%;
-    height: 20%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 5rem;
-    color: #b8860b;
+    text-align: center;
+    font-size: clamp(2rem, 4vw, 4rem);
+    color: #fcf6ba;
     font-weight: 900;
     text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 8px #000;
+    pointer-events: none;
+    z-index: 9010;
 }
 
-#comparison-view .grid-items {
+.close-grid {
     position: absolute;
-    top: 20%;
-    height: 65%;
-    width: 96%;
-    left: 2%;
+    top: 1.8vh;
+    right: 2.5vw;
+    min-width: 54px;
+    min-height: 54px;
+    font-size: clamp(2rem, 3.5vw, 3.4rem);
+    color: #fcf6ba;
+    cursor: pointer;
+    z-index: 9020;
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    gap: 2%;
 }
 
-.close-grid { position: absolute; top: 20px; right: 30px; font-size: 4rem; color: #b8860b; cursor: pointer; z-index: 101; padding: 20px; }
-
-/* Corrección de la falla: Forzar que el hijo sea absoluto dentro del contenedor */
-.rejilla-item {
-    position: relative !important;
-    width: 48% !important;
-    aspect-ratio: 4/3 !important;
-    margin: 0 !important;
+#comparison-grid-2x2 {
+    position: absolute;
+    top: var(--rejilla-top);
+    left: var(--rejilla-bloque-left);
+    width: var(--rejilla-bloque-w);
+    height: var(--rejilla-bloque-h);
+    display: grid;
+    grid-template-columns: repeat(2, var(--rejilla-w));
+    grid-template-rows: repeat(2, var(--rejilla-h));
+    gap: var(--gap-px);
+    z-index: 9015;
 }
 
-.rejilla-item img, .rejilla-item video {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    border-radius: inherit !important;
+#comparison-grid-2x2.grid-locked {
+    pointer-events: none;
 }
 
-/* Solución al elemento fantasma: Ocultar hermanos al expandir */
-#comparison-view .grid-items.has-expanded .rejilla-item:not(.expanded) {
-    display: none !important;
+.rejilla-item[data-rol="rejilla"] {
+    width: var(--rejilla-w);
+    height: var(--rejilla-h);
+    padding: var(--rejilla-marco);
+    border-radius: var(--rejilla-radio-ext);
+    cursor: pointer;
+    will-change: transform;
+}
+.rejilla-item[data-rol="rejilla"] > .marco-inner {
+    border-radius: var(--rejilla-radio-int);
 }
 
-/* Forzar que el expandido no ocupe espacio físico en el grid padre */
-#comparison-view .rejilla-item.expanded {
-    width: 96% !important;
-    height: auto !important;
-    position: fixed !important;
-    top: 50% !important; left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 10000 !important;
-    float: none !important;
-    pointer-events: auto !important;
+.rejilla-slot-placeholder[data-rol="rejilla"] {
+    width: var(--rejilla-w);
+    height: var(--rejilla-h);
+    border-radius: var(--rejilla-radio-ext);
+    border: 2px dashed rgba(184, 134, 11, 0.28);
+    background: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   4. ROL: VISTA MAXIMIZADA DE INSPECCIÓN (HD BAJO DEMANDA + ZOOM/PAN GPU + TACHE X)
+   ========================================================================== */
+#maximized-view[data-rol="maximizada"] {
+    position: fixed;
+    top: var(--maximizada-top);
+    left: var(--maximizada-left);
+    width: var(--maximizada-w);
+    height: var(--maximizada-h);
+    padding: var(--maximizada-marco);
+    border-radius: var(--maximizada-radio-ext);
+    z-index: 9200;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.92), var(--oro-sombra-int);
+}
+
+#maximized-view[data-rol="maximizada"] > .marco-inner {
+    border-radius: var(--maximizada-radio-int);
+    touch-action: none;
+    cursor: grab;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+#maximized-view[data-rol="maximizada"] > .marco-inner:active {
+    cursor: grabbing;
+}
+
+.maximized-media-stage {
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    transform: translate3d(0px, 0px, 0) scale(1);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+.maximized-media-stage > img,
+.maximized-media-stage > video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+.btn-close-maximized {
+    position: absolute;
+    top: calc(var(--maximizada-marco, 12px) + 10px);
+    right: calc(var(--maximizada-marco, 12px) + 10px);
+    min-width: 56px;
+    min-height: 56px;
+    width: clamp(52px, 5.5vw, 72px);
+    height: clamp(52px, 5.5vw, 72px);
+    border-radius: 50%;
+    background: var(--oro-gradiente);
+    border: 3px solid #5c3d08;
+    color: #2b1a00;
+    font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9300;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    touch-action: manipulation;
+}
+.btn-close-maximized:active {
+    transform: scale(0.94);
 }
 
 #comparison-view .comparison-footer {
     position: absolute;
-    top: 85%;
-    height: 15%;
+    bottom: 2.5vh;
+    left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 3vw;
+    z-index: 9020;
 }
 
-.item-grid img, .item-grid video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.qr-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9600;
 }
-
-.item-grid img, .item-grid video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.qr-modal-box {
+    width: min(82vw, 520px);
+    height: auto;
+    padding: 18px;
+    border-radius: 28px;
+    position: relative;
+}
+.qr-modal-content {
+    background: #14110e;
+    border-radius: 18px;
+    padding: 32px 24px;
+    text-align: center;
+    color: #fcf6ba;
+}
+.qr-modal-content h2 {
+    margin: 0 0 18px;
+    font-size: 1.8rem;
+}
+.qr-code-img {
+    width: 280px;
+    height: 280px;
+    background: #fff;
+    padding: 12px;
+    border-radius: 14px;
+}
+#qr-url-label {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #ccc;
+    word-break: break-all;
 }
 
