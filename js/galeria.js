@@ -1,10 +1,11 @@
 /**
- * js/galeria.js - Controlador Unificado de Carrete, Rejilla 2x2 y Vista Maximizada HD
- * Óptica ECO - Optimizado para Raspberry Pi 4
+ * @file js/galeria.js
+ * @description Controlador Unificado de Carrete Horizontal, Rejilla Comparadora 2x2
+ *              y Vista Maximizada de Inspección HD para el Kiosco Óptica ECO.
  */
 (function() {
     const state = {
-        items: [], // { id, type, ruta_baja, ruta_alta, file_hd, file_proxy, isFavorite, blobUrlBaja, blobUrlAlta }
+        items: [],
         activeSlotIndex: null,
         isMaximizedOpen: false
     };
@@ -35,7 +36,6 @@
 
     function createMediaHTML(src, type, isLiveOrMaximized) {
         if (type === 'video') {
-            // En carrete y rejilla 2x2 el video permanece pausado en primer cuadro para cuidar CPU/GPU en Raspberry Pi 4
             if (isLiveOrMaximized) {
                 return `<video src="${src}" class="media-content" autoplay loop muted playsinline></video>`;
             }
@@ -45,7 +45,6 @@
     }
 
     function autoAssignLastFourFavorites() {
-        // Al agregar una nueva captura, si hay <= 4 todas son favoritas; si hay > 4 mantenemos las últimas 4 activas
         const total = state.items.length;
         state.items.forEach((item, idx) => {
             item.isFavorite = (idx >= total - 4);
@@ -82,7 +81,6 @@
         if (serverData.file_hd || serverData.file) item.file_hd = serverData.file_hd || serverData.file;
         if (serverData.file_proxy) item.file_proxy = serverData.file_proxy;
     }
-
     function renderCarrete(scrollToEnd = false) {
         if (!els.thumbnailsContainer) return;
         els.thumbnailsContainer.innerHTML = '';
@@ -127,7 +125,6 @@
             els.thumbnailsContainer.scrollLeft = els.thumbnailsContainer.scrollWidth;
         }
     }
-
 
     function toggleFavorite(id) {
         const item = state.items.find(p => p.id === id);
@@ -270,7 +267,6 @@
             window.GestorMedios.resetZoomPan();
         }
     }
-
     function closeMaximizedView() {
         if (!els.maximizedView) return;
 
@@ -358,11 +354,11 @@
             });
         }
 
-        if (els.btnCompare) els.btnCompare.addEventListener('click', toggleComparisonView);
+        if (els.btnCompare) els.btnCompare.addEventListener('click', toggleComparisonView);   
         if (els.btnCloseComparison) els.btnCloseComparison.addEventListener('click', closeComparisonView);
         if (els.btnCompareClose) els.btnCompareClose.addEventListener('click', closeComparisonView);
 
-        if (els.btnGenerateQr) els.btnGenerateQr.addEventListener('click', showWhatsAppQR);
+        if (els.btnGenerateQr) els.btnGenerateQr.addEventListener('click', showWhatsAppQR); 
         if (els.btnCompareWhatsapp) els.btnCompareWhatsapp.addEventListener('click', showWhatsAppQR);
         if (els.btnCloseQr && els.qrModal) {
             els.btnCloseQr.addEventListener('click', () => els.qrModal.classList.add('hidden'));
@@ -370,10 +366,6 @@
         if (els.btnCleanAll) {
             els.btnCleanAll.addEventListener('click', clearAllMedia);
         }
-
-        window.addEventListener('kioscoMediaCaptured', (e) => {
-            if (e.detail) addMediaItem(e.detail);
-        });
     });
 
     window.KioscoGaleria = {
@@ -385,6 +377,4 @@
         closeMaximizedView,
         getState: () => state
     };
-    window.openComparison = toggleComparisonView;
 })();
-

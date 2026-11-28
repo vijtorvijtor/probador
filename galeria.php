@@ -71,10 +71,14 @@ $fullGalleryUrl =$protocol . $_SERVER['HTTP_HOST'] .$_SERVER['REQUEST_URI'];
 
 <?php if (count($fotos) > 0): ?>
     <div class="gallery-grid" id="gallery-container">
-        <?php foreach ($fotos as $index =>$foto): ?>
-            <!-- Todas las imágenes inician marcadas como favoritas por defecto -->
-            <div class="photo-card favorite" id="card-<?php echo $index; ?>" data-full-url="<?php echo $baseUrl .$foto['url']; ?>">
-                <img src="<?php echo htmlspecialchars($foto['url']); ?>" alt="Armazón Óptica ECO">
+        <?php foreach ($fotos as $index => $foto): ?>
+            <!-- Todas las capturas inician marcadas como favoritas por defecto -->
+            <div class="photo-card favorite" id="card-<?php echo $index; ?>" data-full-url="<?php echo htmlspecialchars($baseUrl . $foto['url']); ?>">
+                <?php if ($foto['type'] === 'video'): ?>
+                    <video src="<?php echo htmlspecialchars($foto['url']); ?>" controls loop muted playsinline></video>
+                <?php else: ?>
+                    <img src="<?php echo htmlspecialchars($foto['url']); ?>" alt="Armazón Óptica ECO">
+                <?php endif; ?>
                 
                 <div class="card-actions">
                     <button class="btn-action btn-fav active" onclick="toggleFavorite(this)">

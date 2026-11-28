@@ -24,23 +24,40 @@ $reporte = [
 
 foreach ($carpetas as $dir) {
     if (is_dir($dir)) {
-        // Obtenemos todos los archivos excepto . y ..
-        $archivos = array_diff(scandir($dir), array('.', '..', '.htaccess', 'index.php'));
+        $entradas = array_diff(scandir($dir), array('.', '..', '.htaccess', 'index.php'));
         
-        foreach ($archivos as $nombre_archivo) {
-            $ruta_completa = $dir . $nombre_archivo;
+        foreach ($entradas as $nombre) {
+            $ruta_completa = $dir . $nombre;
             
-            if (is_file($ruta_completa)) {
+            if (is_dir($ruta_completa)) {
+                // Subcarpeta de sesión galerias/{token}/
+                $antiguedad_dir = $ahora - filemtime($ruta_completa);
+                if ($antiguedad_dir > $segundos_limite) {
+                    $subarchivos = array_diff(scandir($ruta_completa), array('.', '..'));
+                    foreach ($subarchivos as $sub) {
+                        $ruta_sub = $ruta_completa . '/' . $sub;
+                        if (is_file($ruta_sub)) {
+                            $reporte['archivos_analizados']++;
+                            $tamano = filesize($ruta_sub);
+                            if (@unlink($ruta_sub)) {
+                                $reporte['archivos_eliminados']++;
+                                $reporte['espacio_liberado_kb'] += round($tamano / 1024, 2);
+                            }
+                        }
+                    }
+                    @rmdir($ruta_completa);
+                }
+            } elseif (is_file($ruta_completa)) {
                 $reporte['archivos_analizados']++;
                 $antiguedad = $ahora - filemtime($ruta_completa);
                 
                 if ($antiguedad > $segundos_limite) {
                     $tamano = filesize($ruta_completa);
-                    if (unlink($ruta_completa)) {
+                    if (@unlink($ruta_completa)) {
                         $reporte['archivos_eliminados']++;
                         $reporte['espacio_liberado_kb'] += round($tamano / 1024, 2);
                     } else {
-                        $reporte['errores'][] = "No se pudo borrar: $nombre_archivo";
+                        $reporte['errores'][] = "No se pudo borrar: $nombre";
                     }
                 }
             }
